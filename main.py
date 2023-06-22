@@ -41,8 +41,8 @@ def place_rectangle(initial_matrix, ini_row, ini_col, width, height, coefficient
 		return initial_matrix, -1
 
 
-num_rows = 200
-num_cols = 300
+num_rows = 300
+num_cols = 200
 
 matrix = np.zeros((num_rows, num_cols))
 
@@ -51,7 +51,8 @@ rectangle_dimensions_by_type = np.array([[30, 40],
 										[7, 10]])
 
 
-number_of_rectangles_by_type = [3, 10, 30]
+number_of_rectangles_by_type = [5, 10, 50]
+border_by_type = [20, 30, 50]
 
 for rectangle_type, number_rectangles in enumerate(number_of_rectangles_by_type):
 
@@ -64,13 +65,20 @@ for rectangle_type, number_rectangles in enumerate(number_of_rectangles_by_type)
 
 		print(f"\tRectangle {id_rectangle} of {number_rectangles}")
 
-		rand_row = random.randint(0, num_rows-1)
-		rand_col = random.randint(0, num_cols-1)
-
 		rectangle_placed = False
 		counter = 0
+		border = border_by_type[rectangle_type]
 
 		while not rectangle_placed:
+
+			if border > 0:
+				border -= 1
+
+			rand_row = random.randint(0 + border, num_rows - 1 - border)
+			rand_col = random.randint(0 + border, num_cols - 1 - border)
+
+			rand_row = rand_row - int(np.round(rectangle_height/2))
+			rand_col = rand_col - int(np.round(rectangle_width/2))
 
 			counter += 1
 			matrix, status = place_rectangle(matrix, rand_row, rand_col, rectangle_width, rectangle_height, rectangle_type+1)
