@@ -16,14 +16,28 @@ def enough_space(initial_matrix, ini_row, ini_col, width, height):
 	return True
 
 
-def place_rectangle(initial_matrix, ini_row, ini_col, width, height):
+def is_empty(initial_matrix, ini_row, ini_col, width, height):
+	if np.sum(initial_matrix[ini_row:ini_row + height, ini_col:ini_col + width]) == 0:
+		return True
+	else:
+		return False
 
-	if enough_space(initial_matrix, ini_row, ini_col, width, height):
+
+def can_be_placed(initial_matrix, ini_row, ini_col, width, height):
+	if is_empty(initial_matrix, ini_row, ini_col, width, height):
+		return enough_space(initial_matrix, ini_row, ini_col, width, height)
+	else:
+		return False
+
+
+def place_rectangle(initial_matrix, ini_row, ini_col, width, height, coefficient):
+
+	if can_be_placed(initial_matrix, ini_row, ini_col, width, height):
 		new_matrix = np.copy(initial_matrix)
-		new_matrix[ini_row:ini_row+height, ini_col:ini_col+width] = 2*np.ones((height, width))
+		new_matrix[ini_row:ini_row+height, ini_col:ini_col+width] = coefficient*np.ones((height, width))
 		return new_matrix
 	else:
-		print("Not enough space!")
+		print("The rectangle cannot be placed")
 		return initial_matrix
 
 
@@ -40,7 +54,7 @@ for _ in range(20):
 	rand_width = random.randint(1, 10)
 	rand_height = random.randint(1, 10)
 
-	matrix = place_rectangle(matrix, rand_row, rand_col, rand_width, rand_height)
+	matrix = place_rectangle(matrix, rand_row, rand_col, rand_width, rand_height, 1)
 
 plt.matshow(matrix)
 
