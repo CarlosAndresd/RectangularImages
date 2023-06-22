@@ -48,11 +48,12 @@ matrix = np.zeros((num_rows, num_cols))
 
 rectangle_dimensions_by_type = np.array([[30, 40],
 										[15, 20],
+										[10, 15],
 										[7, 10]])
 
 
-number_of_rectangles_by_type = [5, 10, 50]
-border_by_type = [20, 30, 50]
+number_of_rectangles_by_type = [5, 10, 20, 50]
+border_by_type = [20, 30, 40, 50]
 
 for rectangle_type, number_rectangles in enumerate(number_of_rectangles_by_type):
 
