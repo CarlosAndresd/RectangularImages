@@ -150,8 +150,9 @@ def allocate_rectangles(num_rows, num_cols, rectangle_dimensions_by_type, number
 					print("Limit reached")
 					rectangle_placed = True
 
-	image_left_border, image_right_border, image_top_border, image_bottom_border = find_borders(matrix, bleed)
-	return matrix[image_top_border:image_bottom_border, image_left_border:image_right_border], rectangle_allocation
+	matrix_borders = find_borders(matrix, bleed)
+	image_left_border, image_right_border, image_top_border, image_bottom_border = matrix_borders
+	return matrix[image_top_border:image_bottom_border, image_left_border:image_right_border], rectangle_allocation, matrix_borders
 
 
 def show_matrix(matrix):
@@ -159,14 +160,49 @@ def show_matrix(matrix):
 	plt.show()
 
 
+def create_latex_file(rectangle_allocation, matrix_borders):
+	latex_file = open('resulting_images.tex', 'w')
+	latex_file.write(chr(92) + 'documentclass[tikz,border=0pt]' + chr(123) + 'standalone}' + '\n')
+
+	latex_file.write(chr(92) + 'begin' + chr(123) + 'document}' + '\n')
+	latex_file.write(chr(92) + 'begin' + chr(123) + 'tikzpicture}' + '\n')
+
+	image_left_border, image_right_border, image_top_border, image_bottom_border = matrix_borders
+
+	latex_file.write(chr(92) + 'fill[black] (' + str(image_left_border) + 'mm,' + str(image_top_border) + 'mm)  rectangle (' + str(image_right_border) + 'mm,' + str(image_bottom_border) + 'mm);' + '\n')
+
+	for rectangle_information in rectangle_allocation:
+		place_rectangle_image(rectangle_information, latex_file)
+
+	latex_file.write(chr(92) + 'end' + chr(123) + 'tikzpicture}' + '\n')
+	latex_file.write(chr(92) + 'end' + chr(123) + 'document}' + '\n')
+
+
+def place_rectangle_image(rectangle_information, latex_file):
+	card_number = rectangle_information[0]+1
+	card_type = rectangle_information[1]+1
+	rand_row = rectangle_information[2]
+	rand_col = rectangle_information[3]
+	rectangle_width = rectangle_information[4]
+	rectangle_height = rectangle_information[5]
+
+	y_pos = rand_row + 0.5*rectangle_height
+	x_pos = rand_col + 0.5*rectangle_width
+
+	latex_file.write(chr(92) + 'node at (' + str(x_pos) + 'mm,' + str(y_pos) + 'mm) {' + chr(92) +
+					 'includegraphics[height=' + str(0.9*rectangle_height) + 'mm]{images/card_' +
+					 str(int(card_number)) + '-color_' + str(int(card_type)) + '.pdf}};' + '\n')
+
+
 num_r = 300*2
 num_c = 200*2
 
-rectangle_dimensions = np.array([[30, 40], [15, 20], [10, 15], [7, 10]])
-number_of_rectangles = [5, 10, 20, 50]
-border = [120, 130, 140, 150]
+rectangle_dimensions = np.array([[30, 40], [20, 27], [15, 20], [10, 15]])
+number_of_rectangles = [5, 10, 20, 30]
+border = [150, 130, 140, 150]
 bleed = 10
 
-matrix, rectangle_allocation = allocate_rectangles(num_r, num_c, rectangle_dimensions, number_of_rectangles, border, bleed)
+matrix, rectangle_allocation, matrix_borders = allocate_rectangles(num_r, num_c, rectangle_dimensions, number_of_rectangles, border, bleed)
 print(rectangle_allocation)
+create_latex_file(rectangle_allocation, matrix_borders)
 show_matrix(matrix)
