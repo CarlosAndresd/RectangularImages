@@ -1,10 +1,10 @@
-# import sys
+import sys
 
-# card_number = int(sys.argv[1])
-# color_number = int(sys.argv[2])
+card_number = int(sys.argv[1])
+color_number = int(sys.argv[2])
 
-card_number = 2
-color_number = 2
+# card_number = 4
+# color_number = 4
 
 colors = ['50,205,50', '48, 122, 219', '255,69,0', '231, 250, 254', '254, 231, 250']
 
@@ -28,6 +28,6 @@ f.write(chr(92) + 'end' + chr(123) + 'tikzpicture}' + '\n')
 f.write(chr(92) + 'end' + chr(123) + 'document}' + '\n')
 
 
-
+# pdflatex -no-shell-escape  images/single_image_creation.tex
 
 
