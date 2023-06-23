@@ -41,8 +41,56 @@ def place_rectangle(initial_matrix, ini_row, ini_col, width, height, coefficient
 		return initial_matrix, -1
 
 
-num_rows = 300
-num_cols = 200
+def find_borders(matrix, bleed=0):
+	total_height = np.shape(matrix)[0]
+	total_width = np.shape(matrix)[1]
+
+	left_border_found = False
+	right_border_found = False
+	top_border_found = False
+	bottom_border_found = False
+
+	left_border = -1
+	while not left_border_found:
+		left_border += 1
+		column = matrix[:, left_border]
+		if np.sum(column) > 0:
+			left_border_found = True
+
+	left_border = np.amax([0, left_border-bleed])
+
+	right_border = total_width
+	while not right_border_found:
+		right_border -= 1
+		column = matrix[:, right_border]
+		if np.sum(column) > 0:
+			right_border_found = True
+
+	right_border = np.amin([total_width, right_border + bleed])
+
+	top_border = -1
+	while not top_border_found:
+		top_border += 1
+		row = matrix[top_border, :]
+		if np.sum(row) > 0:
+			top_border_found = True
+
+	top_border = np.amax([0, top_border - bleed])
+
+	bottom_border = total_height
+	while not bottom_border_found:
+		bottom_border -= 1
+		row = matrix[bottom_border, :]
+		if np.sum(row) > 0:
+			bottom_border_found = True
+
+	bottom_border = np.amin([total_height, bottom_border + bleed])
+
+	return left_border, right_border, top_border, bottom_border
+
+
+num_rows = 300*2
+num_cols = 200*2
 
 matrix = np.zeros((num_rows, num_cols))
 
@@ -53,7 +101,7 @@ rectangle_dimensions_by_type = np.array([[30, 40],
 
 
 number_of_rectangles_by_type = [5, 10, 20, 50]
-border_by_type = [20, 30, 40, 50]
+border_by_type = [120, 130, 140, 150]
 
 for rectangle_type, number_rectangles in enumerate(number_of_rectangles_by_type):
 
@@ -94,6 +142,10 @@ for rectangle_type, number_rectangles in enumerate(number_of_rectangles_by_type)
 				print("Limit reached")
 				rectangle_placed = True
 
-plt.matshow(matrix)
 
+image_left_border, image_right_border, image_top_border, image_bottom_border = find_borders(matrix, 10)
+matrix = matrix[image_top_border:image_bottom_border, image_left_border:image_right_border]
+
+
+plt.matshow(matrix)
 plt.show()
