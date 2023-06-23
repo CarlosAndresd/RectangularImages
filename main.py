@@ -89,34 +89,44 @@ def find_borders(matrix, bleed=0):
 	return left_border, right_border, top_border, bottom_border
 
 
-
-
 def allocate_rectangles(num_rows, num_cols, rectangle_dimensions_by_type, number_of_rectangles_by_type, border_by_type, bleed):
+
+	num_rectangles = np.sum(number_of_rectangles_by_type)
+
+	rectangle_allocation = np.zeros((num_rectangles, 5))
+	# Information by columns:
+	# Column 1 -> rectangle type
+	# Column 2 -> initial row
+	# Column 3 -> initial column
+	# Column 4 -> rectangle width
+	# Column 5 -> rectangle height
+
+	current_rectangle = 0
 
 	matrix = np.zeros((num_rows, num_cols))
 
 	for rectangle_type, number_rectangles in enumerate(number_of_rectangles_by_type):
 
-		print(f"Rectangle type = {rectangle_type}")
+		# print(f"Rectangle type = {rectangle_type}")
 
 		rectangle_width = rectangle_dimensions_by_type[rectangle_type][0]
 		rectangle_height = rectangle_dimensions_by_type[rectangle_type][1]
 
 		for id_rectangle in range(number_rectangles):
 
-			print(f"\tRectangle {id_rectangle} of {number_rectangles}")
+			# print(f"\tRectangle {id_rectangle} of {number_rectangles}")
 
 			rectangle_placed = False
 			counter = 0
-			border = border_by_type[rectangle_type]
+			initial_border = border_by_type[rectangle_type]
 
 			while not rectangle_placed:
 
-				if border > 0:
-					border -= 1
+				if initial_border > 0:
+					initial_border -= 1
 
-				rand_row = random.randint(0 + border, num_rows - 1 - border)
-				rand_col = random.randint(0 + border, num_cols - 1 - border)
+				rand_row = random.randint(0 + initial_border, num_rows - 1 - initial_border)
+				rand_col = random.randint(0 + initial_border, num_cols - 1 - initial_border)
 
 				rand_row = rand_row - int(np.round(rectangle_height/2))
 				rand_col = rand_col - int(np.round(rectangle_width/2))
@@ -129,13 +139,17 @@ def allocate_rectangles(num_rows, num_cols, rectangle_dimensions_by_type, number
 				if status == 1:
 					# print("Rectangle placed")
 					rectangle_placed = True
+					rectangle_allocation[current_rectangle, :] = np.array([rectangle_type, rand_row, rand_col, rectangle_width, rectangle_height])
+					current_rectangle += 1
+
+
 
 				if counter > 10000:
 					print("Limit reached")
 					rectangle_placed = True
 
 	image_left_border, image_right_border, image_top_border, image_bottom_border = find_borders(matrix, bleed)
-	return matrix[image_top_border:image_bottom_border, image_left_border:image_right_border]
+	return matrix[image_top_border:image_bottom_border, image_left_border:image_right_border], rectangle_allocation
 
 
 def show_matrix(matrix):
@@ -151,4 +165,6 @@ number_of_rectangles = [5, 10, 20, 50]
 border = [120, 130, 140, 150]
 bleed = 10
 
-show_matrix(allocate_rectangles(num_r, num_c, rectangle_dimensions, number_of_rectangles, border, bleed))
+matrix, rectangle_allocation = allocate_rectangles(num_r, num_c, rectangle_dimensions, number_of_rectangles, border, bleed)
+print(rectangle_allocation)
+show_matrix(matrix)
