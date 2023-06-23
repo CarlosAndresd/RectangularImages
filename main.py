@@ -200,6 +200,10 @@ num_c = 200*2
 rectangle_dimensions = np.array([[30, 40], [20, 27], [15, 20], [10, 15]])
 number_of_rectangles = [5, 10, 20, 30]
 border = [150, 130, 140, 150]
+
+rectangle_dimensions_dict = {10: [30, 40], 9: [20, 27], 8: [15, 20], 7: [10, 15], 6:[10, 15]}
+
+
 bleed = 10
 
 matrix, rectangle_allocation, matrix_borders = allocate_rectangles(num_r, num_c, rectangle_dimensions, number_of_rectangles, border, bleed)
