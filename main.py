@@ -93,13 +93,14 @@ def allocate_rectangles(num_rows, num_cols, rectangle_dimensions_by_type, number
 
 	num_rectangles = np.sum(number_of_rectangles_by_type)
 
-	rectangle_allocation = np.zeros((num_rectangles, 5))
+	rectangle_allocation = np.zeros((num_rectangles, 6))
 	# Information by columns:
-	# Column 1 -> rectangle type
-	# Column 2 -> initial row
-	# Column 3 -> initial column
-	# Column 4 -> rectangle width
-	# Column 5 -> rectangle height
+	# Column 1 -> card number
+	# Column 2 -> rectangle type
+	# Column 3 -> initial row
+	# Column 4 -> initial column
+	# Column 5 -> rectangle width
+	# Column 6 -> rectangle height
 
 	current_rectangle = 0
 
@@ -111,6 +112,8 @@ def allocate_rectangles(num_rows, num_cols, rectangle_dimensions_by_type, number
 
 		rectangle_width = rectangle_dimensions_by_type[rectangle_type][0]
 		rectangle_height = rectangle_dimensions_by_type[rectangle_type][1]
+
+		card_number = 0
 
 		for id_rectangle in range(number_rectangles):
 
@@ -139,10 +142,9 @@ def allocate_rectangles(num_rows, num_cols, rectangle_dimensions_by_type, number
 				if status == 1:
 					# print("Rectangle placed")
 					rectangle_placed = True
-					rectangle_allocation[current_rectangle, :] = np.array([rectangle_type, rand_row, rand_col, rectangle_width, rectangle_height])
+					rectangle_allocation[current_rectangle, :] = np.array([card_number, rectangle_type, rand_row, rand_col, rectangle_width, rectangle_height])
 					current_rectangle += 1
-
-
+					card_number += 1
 
 				if counter > 10000:
 					print("Limit reached")

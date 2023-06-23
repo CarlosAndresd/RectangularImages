@@ -6,9 +6,10 @@ color_number = int(sys.argv[2])
 # card_number = 4
 # color_number = 4
 
-colors = ['50,205,50', '48, 122, 219', '255,69,0', '231, 250, 254', '254, 231, 250']
+colors = ['255,69,0', '255,140,0', '34,139,34', '100,149,237', '30,144,255', '0,0,128', '138,43,226', '139,0,139',
+		  '255,20,147', '210,105,30']
 
-f = open('images/single_image_creation.tex', 'w')
+f = open('single_image_creation.tex', 'w')
 f.write(chr(92) + 'documentclass[tikz,border=0pt]' + chr(123) + 'standalone}' + '\n')
 f.write(chr(92) + 'definecolor' + chr(123) + 'CardColor}' + chr(123) + 'RGB}{' + colors[color_number-1] + '}' + '\n')
 
