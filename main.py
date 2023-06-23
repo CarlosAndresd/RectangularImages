@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+import pandas as pd
 
 
 def enough_space(initial_matrix, ini_row, ini_col, width, height):
@@ -89,9 +90,9 @@ def find_borders(matrix, bleed=0):
 	return left_border, right_border, top_border, bottom_border
 
 
-def allocate_rectangles(num_rows, num_cols, rectangle_dimensions_by_type, number_of_rectangles_by_type, border_by_type, bleed):
+def allocate_rectangles(num_rows, num_cols, different_types, rectangle_dimensions_by_type, number_of_rectangles_by_type, border_by_type, bleed):
 
-	num_rectangles = np.sum(number_of_rectangles_by_type)
+	num_rectangles = sum(number_of_rectangles_by_type.values())
 
 	rectangle_allocation = np.zeros((num_rectangles, 6))
 	# Information by columns:
@@ -106,9 +107,11 @@ def allocate_rectangles(num_rows, num_cols, rectangle_dimensions_by_type, number
 
 	matrix = np.zeros((num_rows, num_cols))
 
-	for rectangle_type, number_rectangles in enumerate(number_of_rectangles_by_type):
+	for rectangle_type in different_types: # number_rectangles in enumerate(number_of_rectangles_by_type):
 
 		# print(f"Rectangle type = {rectangle_type}")
+
+		number_rectangles = number_of_rectangles_by_type[rectangle_type]
 
 		rectangle_width = rectangle_dimensions_by_type[rectangle_type][0]
 		rectangle_height = rectangle_dimensions_by_type[rectangle_type][1]
@@ -126,7 +129,8 @@ def allocate_rectangles(num_rows, num_cols, rectangle_dimensions_by_type, number
 			while not rectangle_placed:
 
 				if initial_border > 0:
-					initial_border -= 1
+					if counter > 1000:
+						initial_border -= 1
 
 				rand_row = random.randint(0 + initial_border, num_rows - 1 - initial_border)
 				rand_col = random.randint(0 + initial_border, num_cols - 1 - initial_border)
@@ -160,7 +164,7 @@ def show_matrix(matrix):
 	plt.show()
 
 
-def create_latex_file(rectangle_allocation, matrix_borders):
+def create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type):
 	latex_file = open('resulting_images.tex', 'w')
 	latex_file.write(chr(92) + 'documentclass[tikz,border=0pt]' + chr(123) + 'standalone}' + '\n')
 
@@ -172,15 +176,15 @@ def create_latex_file(rectangle_allocation, matrix_borders):
 	latex_file.write(chr(92) + 'fill[black] (' + str(image_left_border) + 'mm,' + str(image_top_border) + 'mm)  rectangle (' + str(image_right_border) + 'mm,' + str(image_bottom_border) + 'mm);' + '\n')
 
 	for rectangle_information in rectangle_allocation:
-		place_rectangle_image(rectangle_information, latex_file)
+		place_rectangle_image(rectangle_information, latex_file, image_names_per_type)
 
 	latex_file.write(chr(92) + 'end' + chr(123) + 'tikzpicture}' + '\n')
 	latex_file.write(chr(92) + 'end' + chr(123) + 'document}' + '\n')
 
 
-def place_rectangle_image(rectangle_information, latex_file):
-	card_number = rectangle_information[0]+1
-	card_type = rectangle_information[1]+1
+def place_rectangle_image(rectangle_information, latex_file, image_names_per_type):
+	card_number = rectangle_information[0]
+	card_type = rectangle_information[1]
 	rand_row = rectangle_information[2]
 	rand_col = rectangle_information[3]
 	rectangle_width = rectangle_information[4]
@@ -189,24 +193,63 @@ def place_rectangle_image(rectangle_information, latex_file):
 	y_pos = rand_row + 0.5*rectangle_height
 	x_pos = rand_col + 0.5*rectangle_width
 
+	image_name = image_names_per_type[int(card_type)][int(card_number)]
+
 	latex_file.write(chr(92) + 'node at (' + str(x_pos) + 'mm,' + str(y_pos) + 'mm) {' + chr(92) +
-					 'includegraphics[height=' + str(0.9*rectangle_height) + 'mm]{images/card_' +
-					 str(int(card_number)) + '-color_' + str(int(card_type)) + '.pdf}};' + '\n')
+					 'includegraphics[height=' + str(0.99*rectangle_height) + 'mm]{images/' +
+					 image_name + '.pdf}};' + '\n')
 
 
-num_r = 300*2
-num_c = 200*2
+def get_image_information():
 
-rectangle_dimensions = np.array([[30, 40], [20, 27], [15, 20], [10, 15]])
-number_of_rectangles = [5, 10, 20, 30]
-border = [150, 130, 140, 150]
+	images_information = pd.read_excel('images_information.xlsx')
 
-rectangle_dimensions_dict = {10: [30, 40], 9: [20, 27], 8: [15, 20], 7: [10, 15], 6:[10, 15]}
+	# Get the unique values of type
+	type_values = images_information.Type.unique()
 
+	image_names_per_type = dict()
+	number_images_per_type = dict()
+
+	for image_type in type_values:
+		image_names_per_type[image_type] = []
+		number_images_per_type[image_type] = 0
+
+	for row in images_information.index:
+		card_name = images_information['Name'][row]
+		card_type = images_information['Type'][row]
+
+		image_names_per_type[card_type].append(card_name)
+		number_images_per_type[card_type] = number_images_per_type[card_type] + 1
+
+	return type_values, number_images_per_type, image_names_per_type
+
+
+num_r = int(round(1000*1.5))
+num_c = int(round(600*1.5))
+
+# rectangle_dimensions = np.array([[30, 40], [20, 27], [15, 20], [10, 15]])
+# number_of_rectangles = [5, 10, 20, 30]
+# border = [150, 130, 140, 150]
+
+different_types, number_of_rectangles_dict, image_names_per_type = get_image_information()
+
+# different_types = [10, 9, 8, 7, 6]
+
+# number_of_rectangles_dict = {10: 5, 9: 5, 8: 6, 7: 5, 6: 10}
+
+aspect_ratio = 100/60
+
+rectangle_dimensions_dict = {10: [60, int(round(aspect_ratio*60))],
+							 9: [55, int(round(aspect_ratio*55))],
+							 8: [50, int(round(aspect_ratio*50))],
+							 7: [45, int(round(aspect_ratio*45))],
+							 6: [40, int(round(aspect_ratio*40))]}
+border_dict = {10: 200, 9: 200, 8: 200, 7: 200, 6: 200}
 
 bleed = 10
 
-matrix, rectangle_allocation, matrix_borders = allocate_rectangles(num_r, num_c, rectangle_dimensions, number_of_rectangles, border, bleed)
-print(rectangle_allocation)
-create_latex_file(rectangle_allocation, matrix_borders)
+matrix, rectangle_allocation, matrix_borders = allocate_rectangles(num_r, num_c, different_types, rectangle_dimensions_dict, number_of_rectangles_dict, border_dict, bleed)
+
+# print(rectangle_allocation)
+create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type)
 show_matrix(matrix)
