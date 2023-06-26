@@ -269,6 +269,26 @@ matrix, rectangle_allocation, matrix_borders = allocate_rectangles(num_r, num_c,
 
 # print(rectangle_allocation)
 create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type)
-# show_matrix(matrix)
+show_matrix(matrix)
+
+def remove_rectangle(matrix, single_rectangle, matrix_borders):
+	image_left_border, image_right_border, image_top_border, image_bottom_border = matrix_borders
+
+	rectangle_row = single_rectangle[2]-image_top_border
+	rectangle_col = single_rectangle[3]-image_left_border
+	rectangle_width = single_rectangle[4]
+	rectangle_height = single_rectangle[5]
+
+	print(f"row = {rectangle_row}, col = {rectangle_col}, width = {rectangle_width}, height = {rectangle_height} \n")
+
+	matrix[rectangle_row:rectangle_row+rectangle_height, rectangle_col:rectangle_col+rectangle_width] = np.zeros((rectangle_height, rectangle_width))
+
+
+for single_rectangles in rectangle_allocation:
+	print(single_rectangles)
+	remove_rectangle(matrix, single_rectangles, matrix_borders)
+
+
+show_matrix(matrix)
 
 print('Ready')
