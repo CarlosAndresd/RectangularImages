@@ -9,9 +9,11 @@ def enough_space(initial_matrix, ini_row, ini_col, width, height):
 	total_width = np.shape(initial_matrix)[1]
 
 	if ini_row+height > total_height:
+		print('Not enough space')
 		return False
 
 	if ini_col+width > total_width:
+		print('Not enough space')
 		return False
 
 	return True
@@ -21,6 +23,8 @@ def is_empty(initial_matrix, ini_row, ini_col, width, height):
 	if np.sum(initial_matrix[ini_row:ini_row + height, ini_col:ini_col + width]) == 0:
 		return True
 	else:
+		print('Not empty')
+		print(f"sum = {np.sum(initial_matrix[ini_row:ini_row + height, ini_col:ini_col + width])}")
 		return False
 
 
@@ -169,6 +173,12 @@ def show_matrix(matrix):
 	plt.matshow(matrix)
 	plt.show()
 
+def compare_matrices(matrix_1, matrix_2):
+	fig, axs = plt.subplots(ncols=2, nrows=1, figsize=(5.5, 3.5), layout="constrained")
+	axs[0].matshow(matrix_1)
+	axs[1].matshow(matrix_2)
+	plt.show()
+
 
 def create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type):
 	latex_file = open('resulting_images.tex', 'w')
@@ -218,7 +228,7 @@ def place_rectangle_image(rectangle_information, latex_file, image_names_per_typ
 def get_image_information():
 
 	# images_information = pd.read_excel('images_information_v2.xlsx')
-	images_information = pd.read_excel('images_information.xlsx')
+	images_information = pd.read_excel('images_information_v3.xlsx')
 
 	# Get the unique values of type
 	type_values = images_information.Type.unique()
@@ -268,9 +278,17 @@ def move_rectangle_horizontally(matrix, single_rectangle, matrix_borders, horizo
 	# First, remove the rectangle
 	remove_rectangle(matrix, single_rectangle, matrix_borders)
 
+	show_matrix(matrix)
+
 	new_col = rectangle_col + horizontal_movement
 
+	print(f"Old column = {rectangle_col}, new column = {new_col}")
+
+	status = 1
+
 	matrix, status = place_rectangle(matrix, rectangle_row, new_col, rectangle_width, rectangle_height, rectangle_type)
+
+	print(status)
 
 	if status == -1:
 		matrix, _ = place_rectangle(matrix, rectangle_row, rectangle_col, rectangle_width, rectangle_height,
@@ -316,36 +334,39 @@ def move_rectangle(matrix, single_rectangle, matrix_borders, vertical_movement, 
 	return matrix
 
 
-def move_many_rectangles(matrix, rectangle_allocation, matrix_borders):
+def move_many_rectangles(original_matrix, rectangle_allocation, matrix_borders):
 	image_left_border, image_right_border, image_top_border, image_bottom_border = matrix_borders
+
+	matrix = np.copy(original_matrix)
 
 	total_height = np.shape(matrix)[0]
 	total_width = np.shape(matrix)[1]
 
 	num_movements = 100
 
-	for iteration in range(500):
+	for iteration in range(50):
 
 		print(f"iteration = {iteration}")
 
-		for single_rectangles in rectangle_allocation:
-			rectangle_row = single_rectangles[2] - image_top_border
-			rectangle_col = single_rectangles[3] - image_left_border
-			rectangle_width = single_rectangles[4]
-			rectangle_height = single_rectangles[5]
+		# for single_rectangles in rectangle_allocation:
+		single_rectangles = rectangle_allocation[0]
+		rectangle_row = single_rectangles[2] - image_top_border
+		rectangle_col = single_rectangles[3] - image_left_border
+		rectangle_width = single_rectangles[4]
+		rectangle_height = single_rectangles[5]
 
-			if (rectangle_row + 0.5*rectangle_height) < 0.5*total_height:
-				vertical_movement = 1
-			else:
-				vertical_movement = -1
+		if (rectangle_row + 0.5*rectangle_height) < 0.5*total_height:
+			vertical_movement = 1
+		else:
+			vertical_movement = -1
 
-			if (rectangle_col + 0.5*rectangle_width) < 0.5*total_width:
-				horizontal_movement = -1
-			else:
-				horizontal_movement = 1
+		if (rectangle_col + 0.5*rectangle_width) < 0.5*total_width:
+			horizontal_movement = -1
+		else:
+			horizontal_movement = -1
 
-			matrix = move_rectangle(matrix, single_rectangles, matrix_borders, vertical_movement, horizontal_movement,
-						   num_movements)
+		matrix = move_rectangle(matrix, single_rectangles, matrix_borders, vertical_movement, horizontal_movement,
+					   num_movements)
 
 	return matrix
 
@@ -378,15 +399,21 @@ matrix, rectangle_allocation, matrix_borders = allocate_rectangles(num_r, num_c,
 
 # print(rectangle_allocation)
 create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type)
-show_matrix(matrix)
+# show_matrix(matrix)
 
-matrix = move_many_rectangles(matrix, rectangle_allocation, matrix_borders)
+matrix_1 = matrix
+
+matrix_2 = move_many_rectangles(matrix, rectangle_allocation, matrix_borders)
 
 # for single_rectangles in rectangle_allocation:
 # 	print(single_rectangles)
 # 	remove_rectangle(matrix, single_rectangles, matrix_borders)
 
 
-show_matrix(matrix)
+# show_matrix(matrix)
+
+compare_matrices(matrix_1, matrix_2)
+
+# show_matrix(matrix_1)
 
 print('Ready')
