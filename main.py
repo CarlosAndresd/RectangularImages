@@ -240,10 +240,10 @@ different_types, number_of_rectangles_dict, image_names_per_type = get_image_inf
 aspect_ratio = 100/60
 
 rectangle_dimensions_dict = {10: [60, int(round(aspect_ratio*60))],
-							 9: [55, int(round(aspect_ratio*55))],
-							 8: [50, int(round(aspect_ratio*50))],
-							 7: [45, int(round(aspect_ratio*45))],
-							 6: [40, int(round(aspect_ratio*40))]}
+							 9: [35, int(round(aspect_ratio*35))],
+							 8: [30, int(round(aspect_ratio*30))],
+							 7: [25, int(round(aspect_ratio*25))],
+							 6: [20, int(round(aspect_ratio*20))]}
 border_dict = {10: 200, 9: 200, 8: 200, 7: 200, 6: 200}
 
 bleed = 10
