@@ -195,14 +195,16 @@ def place_rectangle_image(rectangle_information, latex_file, image_names_per_typ
 
 	image_name = image_names_per_type[int(card_type)][int(card_number)]
 
+	image_name = image_name.replace(':', '')
+
 	latex_file.write(chr(92) + 'node at (' + str(x_pos) + 'mm,' + str(y_pos) + 'mm) {' + chr(92) +
-					 'includegraphics[height=' + str(0.99*rectangle_height) + 'mm]{images/' +
-					 image_name + '.pdf}};' + '\n')
+					 'includegraphics[height=' + str(1.2*rectangle_height) + 'mm]{images/' +
+					 image_name + '.jpg}};' + '\n')
 
 
 def get_image_information():
 
-	images_information = pd.read_excel('images_information.xlsx')
+	images_information = pd.read_excel('images_information_v2.xlsx')
 
 	# Get the unique values of type
 	type_values = images_information.Type.unique()
@@ -215,8 +217,10 @@ def get_image_information():
 		number_images_per_type[image_type] = 0
 
 	for row in images_information.index:
-		card_name = images_information['Name'][row]
+		card_name = str(images_information['Name'][row])
 		card_type = images_information['Type'][row]
+
+		card_name = card_name.replace(':', '')
 
 		image_names_per_type[card_type].append(card_name)
 		number_images_per_type[card_type] = number_images_per_type[card_type] + 1
@@ -224,8 +228,8 @@ def get_image_information():
 	return type_values, number_images_per_type, image_names_per_type
 
 
-num_r = int(round(1000*1.5))
-num_c = int(round(600*1.5))
+num_r = int(round(1484*1))
+num_c = int(round(1000*1))
 
 # rectangle_dimensions = np.array([[30, 40], [20, 27], [15, 20], [10, 15]])
 # number_of_rectangles = [5, 10, 20, 30]
@@ -237,9 +241,9 @@ different_types, number_of_rectangles_dict, image_names_per_type = get_image_inf
 
 # number_of_rectangles_dict = {10: 5, 9: 5, 8: 6, 7: 5, 6: 10}
 
-aspect_ratio = 100/60
+aspect_ratio = 1484/1000  # 100/60
 
-rectangle_dimensions_dict = {10: [60, int(round(aspect_ratio*60))],
+rectangle_dimensions_dict = {10: [80, int(round(aspect_ratio*80))],  # 60
 							 9: [35, int(round(aspect_ratio*35))],
 							 8: [30, int(round(aspect_ratio*30))],
 							 7: [25, int(round(aspect_ratio*25))],
@@ -252,4 +256,6 @@ matrix, rectangle_allocation, matrix_borders = allocate_rectangles(num_r, num_c,
 
 # print(rectangle_allocation)
 create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type)
-show_matrix(matrix)
+# show_matrix(matrix)
+
+print('Ready')

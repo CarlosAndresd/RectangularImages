@@ -2,7 +2,8 @@ import pandas as pd
 
 def get_image_information():
 
-	images_information = pd.read_excel('images_information.xlsx')
+	# images_information = pd.read_excel('images_information.xlsx')
+	images_information = pd.read_excel('images_information_v2.xlsx')
 
 	# Get the unique values of type
 	type_values = images_information.Type.unique()
@@ -17,6 +18,8 @@ def get_image_information():
 	for row in images_information.index:
 		card_name = images_information['Name'][row]
 		card_type = images_information['Type'][row]
+
+		card_name.replace(':', '')
 
 		image_names_per_type[card_type].append(card_name)
 		number_images_per_type[card_type] = number_images_per_type[card_type] + 1
