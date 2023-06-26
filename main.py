@@ -156,6 +156,12 @@ def allocate_rectangles(num_rows, num_cols, different_types, rectangle_dimension
 
 	matrix_borders = find_borders(matrix, bleed)
 	image_left_border, image_right_border, image_top_border, image_bottom_border = matrix_borders
+
+	df = pd.DataFrame(rectangle_allocation,
+					  columns=['card_number', 'card_type', 'initial_row', 'initial_col', 'card_width', 'card_height'])
+	df = df.sort_values(by='card_type')
+	rectangle_allocation = df.to_numpy(dtype='int')
+
 	return matrix[image_top_border:image_bottom_border, image_left_border:image_right_border], rectangle_allocation, matrix_borders
 
 
@@ -173,10 +179,17 @@ def create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type
 
 	image_left_border, image_right_border, image_top_border, image_bottom_border = matrix_borders
 
+	latex_file.write(chr(92) + 'begin' + chr(123) + 'scope}' + '\n')
+
+	latex_file.write(
+		chr(92) + 'clip (' + str(image_left_border) + 'mm,' + str(image_top_border) + 'mm)  rectangle (' + str(
+			image_right_border) + 'mm,' + str(image_bottom_border) + 'mm);' + '\n')
 	latex_file.write(chr(92) + 'fill[black] (' + str(image_left_border) + 'mm,' + str(image_top_border) + 'mm)  rectangle (' + str(image_right_border) + 'mm,' + str(image_bottom_border) + 'mm);' + '\n')
 
 	for rectangle_information in rectangle_allocation:
 		place_rectangle_image(rectangle_information, latex_file, image_names_per_type)
+
+	latex_file.write(chr(92) + 'end' + chr(123) + 'scope}' + '\n')
 
 	latex_file.write(chr(92) + 'end' + chr(123) + 'tikzpicture}' + '\n')
 	latex_file.write(chr(92) + 'end' + chr(123) + 'document}' + '\n')
