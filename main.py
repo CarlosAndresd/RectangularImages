@@ -9,11 +9,11 @@ def enough_space(initial_matrix, ini_row, ini_col, width, height):
 	total_width = np.shape(initial_matrix)[1]
 
 	if ini_row+height > total_height:
-		print('Not enough space')
+		# print('Not enough space')
 		return False
 
 	if ini_col+width > total_width:
-		print('Not enough space')
+		# print('Not enough space')
 		return False
 
 	return True
@@ -23,8 +23,8 @@ def is_empty(initial_matrix, ini_row, ini_col, width, height):
 	if np.sum(initial_matrix[ini_row:ini_row + height, ini_col:ini_col + width]) == 0:
 		return True
 	else:
-		print('Not empty')
-		print(f"sum = {np.sum(initial_matrix[ini_row:ini_row + height, ini_col:ini_col + width])}")
+		# print('Not empty')
+		# print(f"sum = {np.sum(initial_matrix[ini_row:ini_row + height, ini_col:ini_col + width])}")
 		return False
 
 
@@ -267,6 +267,9 @@ def remove_rectangle(matrix, single_rectangle, matrix_borders):
 
 
 def move_rectangle_horizontally(matrix, single_rectangle, matrix_borders, horizontal_movement):
+	total_height = np.shape(matrix)[0]
+	total_width = np.shape(matrix)[1]
+
 	image_left_border, image_right_border, image_top_border, image_bottom_border = matrix_borders
 
 	rectangle_type = single_rectangle[1]
@@ -278,17 +281,26 @@ def move_rectangle_horizontally(matrix, single_rectangle, matrix_borders, horizo
 	# First, remove the rectangle
 	remove_rectangle(matrix, single_rectangle, matrix_borders)
 
-	show_matrix(matrix)
+	# show_matrix(matrix)
 
 	new_col = rectangle_col + horizontal_movement
 
-	print(f"Old column = {rectangle_col}, new column = {new_col}")
+	if new_col < 0:
+		new_col = 0
+
+	if new_col >= total_width:
+		new_col = total_width
+
+	# print(f"Old column = {rectangle_col}, new column = {new_col}")
 
 	status = 1
 
 	matrix, status = place_rectangle(matrix, rectangle_row, new_col, rectangle_width, rectangle_height, rectangle_type)
 
-	print(status)
+	if status == 1:
+		single_rectangle[3] = new_col + image_left_border
+
+	# print(status)
 
 	if status == -1:
 		matrix, _ = place_rectangle(matrix, rectangle_row, rectangle_col, rectangle_width, rectangle_height,
@@ -298,6 +310,9 @@ def move_rectangle_horizontally(matrix, single_rectangle, matrix_borders, horizo
 
 
 def move_rectangle_vertically(matrix, single_rectangle, matrix_borders, vertical_movement):
+	total_height = np.shape(matrix)[0]
+	total_width = np.shape(matrix)[1]
+
 	image_left_border, image_right_border, image_top_border, image_bottom_border = matrix_borders
 
 	rectangle_type = single_rectangle[1]
@@ -311,7 +326,16 @@ def move_rectangle_vertically(matrix, single_rectangle, matrix_borders, vertical
 
 	new_row = rectangle_row + vertical_movement
 
+	if new_row < 0:
+		new_row = 0
+
+	if new_row >= total_height:
+		new_row = total_height
+
 	matrix, status = place_rectangle(matrix, new_row, rectangle_col, rectangle_width, rectangle_height, rectangle_type)
+
+	if status == 1:
+		single_rectangle[2] = new_row + image_top_border
 
 	if status == -1:
 		matrix, _ = place_rectangle(matrix, rectangle_row, rectangle_col, rectangle_width, rectangle_height,
@@ -327,7 +351,7 @@ def move_rectangle(matrix, single_rectangle, matrix_borders, vertical_movement, 
 
 	while (total_movements < num_movements) and ((status_vertical == 1) or (status_horizontal == 1)):
 		total_movements += 1
-		# matrix, status_vertical = move_rectangle_vertically(matrix, single_rectangle, matrix_borders, vertical_movement)
+		matrix, status_vertical = move_rectangle_vertically(matrix, single_rectangle, matrix_borders, vertical_movement)
 		matrix, status_horizontal = move_rectangle_horizontally(matrix, single_rectangle, matrix_borders, horizontal_movement)
 
 
@@ -344,29 +368,29 @@ def move_many_rectangles(original_matrix, rectangle_allocation, matrix_borders):
 
 	num_movements = 100
 
-	for iteration in range(50):
+	for iteration in range(10):
 
 		print(f"iteration = {iteration}")
 
-		# for single_rectangles in rectangle_allocation:
-		single_rectangles = rectangle_allocation[0]
-		rectangle_row = single_rectangles[2] - image_top_border
-		rectangle_col = single_rectangles[3] - image_left_border
-		rectangle_width = single_rectangles[4]
-		rectangle_height = single_rectangles[5]
+		for single_rectangles in rectangle_allocation:
+			# single_rectangles = rectangle_allocation[0]
+			rectangle_row = single_rectangles[2] - image_top_border
+			rectangle_col = single_rectangles[3] - image_left_border
+			rectangle_width = single_rectangles[4]
+			rectangle_height = single_rectangles[5]
 
-		if (rectangle_row + 0.5*rectangle_height) < 0.5*total_height:
-			vertical_movement = 1
-		else:
-			vertical_movement = -1
+			if (rectangle_row + 0.5*rectangle_height) < 0.5*total_height:
+				vertical_movement = 1
+			else:
+				vertical_movement = -1
 
-		if (rectangle_col + 0.5*rectangle_width) < 0.5*total_width:
-			horizontal_movement = -1
-		else:
-			horizontal_movement = -1
+			if (rectangle_col + 0.5*rectangle_width) < 0.5*total_width:
+				horizontal_movement = 1
+			else:
+				horizontal_movement = -1
 
-		matrix = move_rectangle(matrix, single_rectangles, matrix_borders, vertical_movement, horizontal_movement,
-					   num_movements)
+			matrix = move_rectangle(matrix, single_rectangles, matrix_borders, vertical_movement, horizontal_movement,
+						   num_movements)
 
 	return matrix
 
