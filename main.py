@@ -228,7 +228,8 @@ def place_rectangle_image(rectangle_information, latex_file, image_names_per_typ
 def get_image_information():
 
 	# images_information = pd.read_excel('images_information_v2.xlsx')
-	images_information = pd.read_excel('images_information_v3.xlsx')
+	# images_information = pd.read_excel('images_information_v3.xlsx')
+	images_information = pd.read_excel('images_information.xlsx')
 
 	# Get the unique values of type
 	type_values = images_information.Type.unique()
@@ -264,6 +265,57 @@ def remove_rectangle(matrix, single_rectangle, matrix_borders):
 
 	matrix[rectangle_row:rectangle_row + rectangle_height, rectangle_col:rectangle_col + rectangle_width] = np.zeros(
 		(rectangle_height, rectangle_width))
+
+
+def move_single_rectangle(matrix, single_rectangle, matrix_borders, horizontal_movement, vertical_movement):
+	total_height = np.shape(matrix)[0]
+	total_width = np.shape(matrix)[1]
+
+	image_left_border, image_right_border, image_top_border, image_bottom_border = matrix_borders
+
+	rectangle_type = single_rectangle[1]
+	rectangle_row = single_rectangle[2] - image_top_border
+	rectangle_col = single_rectangle[3] - image_left_border
+	rectangle_width = single_rectangle[4]
+	rectangle_height = single_rectangle[5]
+
+	new_col = rectangle_col + horizontal_movement
+	new_row = rectangle_row + vertical_movement
+
+	if new_col < 0:
+		new_col = 0
+
+	if new_col >= total_width:
+		new_col = total_width
+
+	if new_row < 0:
+		new_row = 0
+
+	if new_row >= total_height:
+		new_row = total_height
+
+	if horizontal_movement != 0:
+		remove_rectangle(matrix, single_rectangle, matrix_borders)
+		matrix, status = place_rectangle(matrix, rectangle_row, new_col, rectangle_width, rectangle_height, rectangle_type)
+		if status == 1:
+			single_rectangle[3] = new_col + image_left_border
+
+		if status == -1:
+			matrix, _ = place_rectangle(matrix, rectangle_row, rectangle_col, rectangle_width, rectangle_height,
+										rectangle_type)
+
+	if vertical_movement != 0:
+		remove_rectangle(matrix, single_rectangle, matrix_borders)
+		matrix, status = place_rectangle(matrix, new_row, rectangle_col, rectangle_width, rectangle_height, rectangle_type)
+
+		if status == 1:
+			single_rectangle[2] = new_row + image_top_border
+
+		if status == -1:
+			matrix, _ = place_rectangle(matrix, rectangle_row, rectangle_col, rectangle_width, rectangle_height,
+											 rectangle_type)
+
+	return matrix, status
 
 
 def move_rectangle_horizontally(matrix, single_rectangle, matrix_borders, horizontal_movement):
@@ -351,8 +403,12 @@ def move_rectangle(matrix, single_rectangle, matrix_borders, vertical_movement, 
 
 	while (total_movements < num_movements) and ((status_vertical == 1) or (status_horizontal == 1)):
 		total_movements += 1
-		matrix, status_vertical = move_rectangle_vertically(matrix, single_rectangle, matrix_borders, vertical_movement)
-		matrix, status_horizontal = move_rectangle_horizontally(matrix, single_rectangle, matrix_borders, horizontal_movement)
+		# matrix, status_vertical = move_rectangle_vertically(matrix, single_rectangle, matrix_borders, vertical_movement)
+		# matrix, status_horizontal = move_rectangle_horizontally(matrix, single_rectangle, matrix_borders, horizontal_movement)
+		matrix, status_vertical = move_single_rectangle(matrix, single_rectangle, matrix_borders,
+																0, vertical_movement)
+		matrix, status_horizontal = move_single_rectangle(matrix, single_rectangle, matrix_borders,
+														  horizontal_movement, 0)
 
 
 	return matrix
