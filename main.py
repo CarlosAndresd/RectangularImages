@@ -173,6 +173,7 @@ def show_matrix(matrix):
 	plt.matshow(matrix)
 	plt.show()
 
+
 def compare_matrices(matrix_1, matrix_2):
 	fig, axs = plt.subplots(ncols=2, nrows=1, figsize=(5.5, 3.5), layout="constrained")
 	axs[0].matshow(matrix_1)
@@ -180,7 +181,7 @@ def compare_matrices(matrix_1, matrix_2):
 	plt.show()
 
 
-def create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type):
+def create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type, file_extension):
 	latex_file = open('resulting_images.tex', 'w')
 	latex_file.write(chr(92) + 'documentclass[tikz,border=0pt]' + chr(123) + 'standalone}' + '\n')
 
@@ -197,7 +198,7 @@ def create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type
 	latex_file.write(chr(92) + 'fill[black] (' + str(image_left_border) + 'mm,' + str(image_top_border) + 'mm)  rectangle (' + str(image_right_border) + 'mm,' + str(image_bottom_border) + 'mm);' + '\n')
 
 	for rectangle_information in rectangle_allocation:
-		place_rectangle_image(rectangle_information, latex_file, image_names_per_type)
+		place_rectangle_image(rectangle_information, latex_file, image_names_per_type, file_extension)
 
 	latex_file.write(chr(92) + 'end' + chr(123) + 'scope}' + '\n')
 
@@ -205,7 +206,7 @@ def create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type
 	latex_file.write(chr(92) + 'end' + chr(123) + 'document}' + '\n')
 
 
-def place_rectangle_image(rectangle_information, latex_file, image_names_per_type):
+def place_rectangle_image(rectangle_information, latex_file, image_names_per_type, file_extension):
 	card_number = rectangle_information[0]
 	card_type = rectangle_information[1]
 	rand_row = rectangle_information[2]
@@ -222,14 +223,12 @@ def place_rectangle_image(rectangle_information, latex_file, image_names_per_typ
 
 	latex_file.write(chr(92) + 'node at (' + str(x_pos) + 'mm,' + str(y_pos) + 'mm) {' + chr(92) +
 					 'includegraphics[height=' + str(0.99*rectangle_height) + 'mm]{images/' +
-					 image_name + '.jpg}};' + '\n')
+					 image_name + '.' + file_extension + '}};' + '\n')
 
 
-def get_image_information():
+def get_image_information(excel_file_name='images_information_v2.xlsx'):
 
-	images_information = pd.read_excel('images_information_v2.xlsx')
-	# images_information = pd.read_excel('images_information_v3.xlsx')
-	# images_information = pd.read_excel('images_information.xlsx')
+	images_information = pd.read_excel(excel_file_name)
 
 	# Get the unique values of type
 	type_values = images_information.Type.unique()
@@ -318,84 +317,6 @@ def move_single_rectangle(matrix, single_rectangle, matrix_borders, horizontal_m
 	return matrix, status
 
 
-def move_rectangle_horizontally(matrix, single_rectangle, matrix_borders, horizontal_movement):
-	total_height = np.shape(matrix)[0]
-	total_width = np.shape(matrix)[1]
-
-	image_left_border, image_right_border, image_top_border, image_bottom_border = matrix_borders
-
-	rectangle_type = single_rectangle[1]
-	rectangle_row = single_rectangle[2] - image_top_border
-	rectangle_col = single_rectangle[3] - image_left_border
-	rectangle_width = single_rectangle[4]
-	rectangle_height = single_rectangle[5]
-
-	# First, remove the rectangle
-	remove_rectangle(matrix, single_rectangle, matrix_borders)
-
-	# show_matrix(matrix)
-
-	new_col = rectangle_col + horizontal_movement
-
-	if new_col < 0:
-		new_col = 0
-
-	if new_col >= total_width:
-		new_col = total_width
-
-	# print(f"Old column = {rectangle_col}, new column = {new_col}")
-
-	status = 1
-
-	matrix, status = place_rectangle(matrix, rectangle_row, new_col, rectangle_width, rectangle_height, rectangle_type)
-
-	if status == 1:
-		single_rectangle[3] = new_col + image_left_border
-
-	# print(status)
-
-	if status == -1:
-		matrix, _ = place_rectangle(matrix, rectangle_row, rectangle_col, rectangle_width, rectangle_height,
-										 rectangle_type)
-
-	return matrix, status
-
-
-def move_rectangle_vertically(matrix, single_rectangle, matrix_borders, vertical_movement):
-	total_height = np.shape(matrix)[0]
-	total_width = np.shape(matrix)[1]
-
-	image_left_border, image_right_border, image_top_border, image_bottom_border = matrix_borders
-
-	rectangle_type = single_rectangle[1]
-	rectangle_row = single_rectangle[2] - image_top_border
-	rectangle_col = single_rectangle[3] - image_left_border
-	rectangle_width = single_rectangle[4]
-	rectangle_height = single_rectangle[5]
-
-	# First, remove the rectangle
-	remove_rectangle(matrix, single_rectangle, matrix_borders)
-
-	new_row = rectangle_row + vertical_movement
-
-	if new_row < 0:
-		new_row = 0
-
-	if new_row >= total_height:
-		new_row = total_height
-
-	matrix, status = place_rectangle(matrix, new_row, rectangle_col, rectangle_width, rectangle_height, rectangle_type)
-
-	if status == 1:
-		single_rectangle[2] = new_row + image_top_border
-
-	if status == -1:
-		matrix, _ = place_rectangle(matrix, rectangle_row, rectangle_col, rectangle_width, rectangle_height,
-									rectangle_type)
-
-	return matrix, status
-
-
 def move_rectangle(matrix, single_rectangle, matrix_borders, vertical_movement, horizontal_movement, num_movements):
 	total_movements = 0
 	status_vertical = 1
@@ -451,59 +372,29 @@ def move_many_rectangles(original_matrix, rectangle_allocation, matrix_borders):
 	return matrix
 
 
-num_r = int(round(1484*1))
-num_c = int(round(1000*1))
+def create_new_poster(excel_file='images_information_v2.xlsx', file_extension='jpg', num_r=1484, num_c=1000,
+					  aspect_ratio=1484/1000, rectangle_dimensions_dict=None, border_dict=None, bleed=10):
 
-# rectangle_dimensions = np.array([[30, 40], [20, 27], [15, 20], [10, 15]])
-# number_of_rectangles = [5, 10, 20, 30]
-# border = [150, 130, 140, 150]
+	num_r = int(round(num_r*1))
+	num_c = int(round(num_c*1))
 
-different_types, number_of_rectangles_dict, image_names_per_type = get_image_information()
+	different_types, number_of_rectangles_dict, image_names_per_type = get_image_information(excel_file)
 
-# different_types = [10, 9, 8, 7, 6]
+	if rectangle_dimensions_dict is None:
+		rectangle_dimensions_dict = {10: [100, int(round(aspect_ratio*100))],
+									 9: [35, int(round(aspect_ratio*35))],
+									 8: [30, int(round(aspect_ratio*30))],
+									 7: [25, int(round(aspect_ratio*25))],
+									 6: [20, int(round(aspect_ratio*20))]}
 
-# number_of_rectangles_dict = {10: 5, 9: 5, 8: 6, 7: 5, 6: 10}
+	if border_dict is None:
+		border_dict = {10: 200, 9: 200, 8: 200, 7: 200, 6: 200}
 
-aspect_ratio = 1484/1000  # 100/60
+	matrix, rectangle_allocation, matrix_borders = allocate_rectangles(num_r, num_c, different_types, rectangle_dimensions_dict, number_of_rectangles_dict, border_dict, bleed)
 
-rectangle_dimensions_dict = {10: [100, int(round(aspect_ratio*100))],  # 60
-							 9: [35, int(round(aspect_ratio*35))],
-							 8: [30, int(round(aspect_ratio*30))],
-							 7: [25, int(round(aspect_ratio*25))],
-							 6: [20, int(round(aspect_ratio*20))]}
-border_dict = {10: 200, 9: 200, 8: 200, 7: 200, 6: 200}
+	_ = move_many_rectangles(matrix, rectangle_allocation, matrix_borders)
 
-bleed = 10
-
-matrix, rectangle_allocation, matrix_borders = allocate_rectangles(num_r, num_c, different_types, rectangle_dimensions_dict, number_of_rectangles_dict, border_dict, bleed)
-
-# print(rectangle_allocation)
-
-# show_matrix(matrix)
-
-matrix_1 = matrix
-
-matrix_2 = move_many_rectangles(matrix, rectangle_allocation, matrix_borders)
-
-new_matrix_borders = find_borders(matrix_2, bleed)
-
-old_image_left_border, old_image_right_border, old_image_top_border, old_image_bottom_border = matrix_borders
-new_image_left_border, new_image_right_border, new_image_top_border, new_image_bottom_border = new_matrix_borders
-
-new_matrix_borders_2 = old_image_left_border + new_image_left_border, old_image_right_border + new_image_right_border, \
-					old_image_top_border + new_image_top_border, old_image_bottom_border + new_image_bottom_border
-
-create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type)
-
-# for single_rectangles in rectangle_allocation:
-# 	print(single_rectangles)
-# 	remove_rectangle(matrix, single_rectangles, matrix_borders)
+	create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type, file_extension)
 
 
-# show_matrix(matrix)
-
-compare_matrices(matrix_1, matrix_2)
-
-# show_matrix(matrix_1)
-
-print('Ready')
+create_new_poster()
