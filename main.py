@@ -221,15 +221,15 @@ def place_rectangle_image(rectangle_information, latex_file, image_names_per_typ
 	image_name = image_name.replace(':', '')
 
 	latex_file.write(chr(92) + 'node at (' + str(x_pos) + 'mm,' + str(y_pos) + 'mm) {' + chr(92) +
-					 'includegraphics[height=' + str(1.2*rectangle_height) + 'mm]{images/' +
+					 'includegraphics[height=' + str(0.99*rectangle_height) + 'mm]{images/' +
 					 image_name + '.jpg}};' + '\n')
 
 
 def get_image_information():
 
-	# images_information = pd.read_excel('images_information_v2.xlsx')
+	images_information = pd.read_excel('images_information_v2.xlsx')
 	# images_information = pd.read_excel('images_information_v3.xlsx')
-	images_information = pd.read_excel('images_information.xlsx')
+	# images_information = pd.read_excel('images_information.xlsx')
 
 	# Get the unique values of type
 	type_values = images_information.Type.unique()
@@ -466,7 +466,7 @@ different_types, number_of_rectangles_dict, image_names_per_type = get_image_inf
 
 aspect_ratio = 1484/1000  # 100/60
 
-rectangle_dimensions_dict = {10: [80, int(round(aspect_ratio*80))],  # 60
+rectangle_dimensions_dict = {10: [100, int(round(aspect_ratio*100))],  # 60
 							 9: [35, int(round(aspect_ratio*35))],
 							 8: [30, int(round(aspect_ratio*30))],
 							 7: [25, int(round(aspect_ratio*25))],
@@ -478,12 +478,22 @@ bleed = 10
 matrix, rectangle_allocation, matrix_borders = allocate_rectangles(num_r, num_c, different_types, rectangle_dimensions_dict, number_of_rectangles_dict, border_dict, bleed)
 
 # print(rectangle_allocation)
-create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type)
+
 # show_matrix(matrix)
 
 matrix_1 = matrix
 
 matrix_2 = move_many_rectangles(matrix, rectangle_allocation, matrix_borders)
+
+new_matrix_borders = find_borders(matrix_2, bleed)
+
+old_image_left_border, old_image_right_border, old_image_top_border, old_image_bottom_border = matrix_borders
+new_image_left_border, new_image_right_border, new_image_top_border, new_image_bottom_border = new_matrix_borders
+
+new_matrix_borders_2 = old_image_left_border + new_image_left_border, old_image_right_border + new_image_right_border, \
+					old_image_top_border + new_image_top_border, old_image_bottom_border + new_image_bottom_border
+
+create_latex_file(rectangle_allocation, matrix_borders, image_names_per_type)
 
 # for single_rectangles in rectangle_allocation:
 # 	print(single_rectangles)
