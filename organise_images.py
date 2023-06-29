@@ -98,6 +98,7 @@ for img_path in file_names:
             creation_time = original_time[0:4] + '_' + original_time[5:7] + '_' + original_time[8:10] + '_' + \
                             original_time[11:13] + '_' + original_time[14:16] + '_' + original_time[17:19]
             creation_year = int(original_time[0:4])
+            creation_month = int(original_time[5:7])
 
     if original_time is None:
         # print('No Exif')
@@ -107,16 +108,17 @@ for img_path in file_names:
                         + '_' + str(original_time.tm_min).zfill(2) + '_' + \
                         str(original_time.tm_sec).zfill(2)
         creation_year = original_time.tm_year
+        creation_month = original_time.tm_mon
 
     original_name = img_path
-    new_name = new_path + '/' + creation_time + file_extension.lower()
+    new_name = new_path + '/' + str(creation_year) + '/' + str(creation_year) + '_' + str(creation_month).zfill(2) + '/' + creation_time + file_extension.lower()
     # print(f"{img_path} -> {new_path}/{creation_time}{file_extension.lower()}")
     if new_name in assigned_names:
         repeated_counter = 0
         repeated_name = True
         while repeated_name:
             repeated_counter += 1
-            new_name = new_path + '/' + creation_time + '_' + str(repeated_counter) + file_extension.lower()
+            new_name = new_path + '/' + str(creation_year) + '/' + str(creation_year) + '_' + str(creation_month).zfill(2) + '/' + creation_time + '_' + str(repeated_counter) + file_extension.lower()
             if not(new_name in assigned_names):
                 repeated_name = False
 
