@@ -40,21 +40,23 @@ def copy_files(folder_path='other_images', resulting_folder='resulting_images',
 	for img_path in file_names:
 
 		_, file_extension = os.path.splitext(img_path)
-		img = Image.open(img_path)
 
-		image_exif = img._getexif()
+		try:
+			img = Image.open(img_path)
+			image_exif = img._getexif()
+			original_time = None
 
-		original_time = None
+			if image_exif is not None:
+				exif = {ExifTags.TAGS[k]: v for k, v in image_exif.items() if k in ExifTags.TAGS}
 
-		if image_exif is not None:
-			exif = {ExifTags.TAGS[k]: v for k, v in image_exif.items() if k in ExifTags.TAGS}
-
-			if 'DateTimeOriginal' in exif.keys():
-				original_time = exif['DateTimeOriginal']
-				creation_time = original_time[0:4] + '_' + original_time[5:7] + '_' + original_time[8:10] + '_' + \
-								original_time[11:13] + '_' + original_time[14:16] + '_' + original_time[17:19]
-				creation_year = int(original_time[0:4])
-				creation_month = int(original_time[5:7])
+				if 'DateTimeOriginal' in exif.keys():
+					original_time = exif['DateTimeOriginal']
+					creation_time = original_time[0:4] + '_' + original_time[5:7] + '_' + original_time[8:10] + '_' + \
+									original_time[11:13] + '_' + original_time[14:16] + '_' + original_time[17:19]
+					creation_year = int(original_time[0:4])
+					creation_month = int(original_time[5:7])
+		except:
+			original_time = None
 
 		if original_time is None:
 			original_time = time.gmtime(os.stat(img_path).st_birthtime)
@@ -86,3 +88,7 @@ def copy_files(folder_path='other_images', resulting_folder='resulting_images',
 		rename(original_name, new_name)
 		print(f"{original_name} -> {new_name}")
 		assigned_names.append(new_name)
+
+
+if __name__ == '__main__':
+	copy_files(copy_file_extensions=('.heic'))
