@@ -3,6 +3,7 @@ from PIL import Image, ExifTags
 from os import walk, rename
 import argparse
 import shutil
+import textwrap
 
 
 def create_year_directory(year, source_path):
@@ -99,14 +100,43 @@ def copy_files(folder_path='other_images', resulting_folder='resulting_images',
 
 
 if __name__ == '__main__':
+	parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+									description=textwrap.dedent('''
+									
+									
+									
+									Organise files by date in a separate directory. The name of the files may change to be the date of creation
+									
+									
+									
+									'''),
+									epilog=textwrap.dedent('''
+			Some examples:
+			--------------
+			
+			Example 1:
+			python move_chronologically.py -s other_images -d results -e .jpg .heic -m true
+			
+			Example 2:
+			python move_chronologically.py -s other_images -d results -e .jpg .heic .png
+			
+			.
+	         '''))
 
-	parser = argparse.ArgumentParser(description='Organise files by date in a separate directory')
+	parser.add_argument('-s', '--source', default='other_images',
+						help="this is the path to the source directory, by default it is 'other_images'")
+	parser.add_argument('-d', '--destination', default='resulting_images',
+						help="this is the path to the destination directory, by default it is 'resulting_images'")
+	parser.add_argument('-e', '--extension', nargs='+', default=('.jpg', '.jpeg', '.png'),
+						help="these are the extensions that will be moved or copied, by default they are '.jpg', '.jpeg', '.png'")
+	parser.add_argument('-m', '--mute', default='false',
+						help="boolean variable that decides whether the copying/moving process is shown or not. By default, it shows the progress")
+	parser.add_argument('-c', '--copy', default='false',
+						help="boolean variable that decides whether the files are copied or not. By default it moves the files")
+	parser.add_argument('-r', '--rename', default='false',
+						help="boolean variable that decides whether the file name changes or not")
 
-	parser.add_argument('-s', '--source', default='other_images')
-	parser.add_argument('-d', '--destination', default='resulting_images')
-	parser.add_argument('-e', '--extension', nargs='+', default=('.jpg', '.jpeg', '.png'))
-	parser.add_argument('-m', '--mute', default='false')
-	parser.add_argument('-c', '--copy', default='false')
+	# python move_chronologically.py -s other_images -d results -e .jpg .heic -m true
 
 	args = parser.parse_args()
 
@@ -115,6 +145,7 @@ if __name__ == '__main__':
 	extension = args.extension
 	mute = args.mute
 	copy = args.copy
+	rename = args.rename
 
 	copy_files(folder_path=folder_path,
 			   resulting_folder=resulting_folder,
