@@ -1,3 +1,5 @@
+__pycache__
+.pytest_cache
 ≈.idea/
 images/
 Complete_Canvas*
