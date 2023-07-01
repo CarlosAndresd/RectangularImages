@@ -15,37 +15,28 @@ def create_year_directory(year, source_path):
 		os.makedirs(month_path)
 
 
-def find_all_files(folder_path, copy_file_extensions):
+def find_all_files(source_directory_path, copy_file_extensions=''):
 	file_names = []
 
-	for (dirpath, dirnames, filenames) in walk(folder_path):
+	for (directory_path, _, filenames) in walk(source_directory_path):
 		for single_file in filenames:
-			complete_path = dirpath + '/' + single_file
-			file_name, file_extension = os.path.splitext(complete_path)
+			complete_path = directory_path + '/' + single_file
+			_, file_extension = os.path.splitext(complete_path)
 
-			if file_extension.lower() in copy_file_extensions:
+			if copy_file_extensions == '':
 				file_names.append(complete_path)
+			else:
+				if file_extension.lower() in copy_file_extensions:
+					file_names.append(complete_path)
 
 	return file_names
 
 
-def copy_files(folder_path='other_images', resulting_folder='resulting_images',
-			   copy_file_extensions=('.jpg', '.jpeg', '.png')):
-	new_path = resulting_folder + '/' + 'all_photos_and_images'
-
-	if not os.path.exists(new_path):
-		os.makedirs(new_path)
-
-	file_names = find_all_files(folder_path, copy_file_extensions)
-	assigned_names = []
-	assigned_years = []
-
-	for img_path in file_names:
-
-		_, file_extension = os.path.splitext(img_path)
+def get_file_date(file_path, which_date='created'):
+	if which_date == 'created':
 
 		try:
-			img = Image.open(img_path)
+			img = Image.open(file_path)
 			image_exif = img._getexif()
 			original_time = None
 
@@ -54,54 +45,106 @@ def copy_files(folder_path='other_images', resulting_folder='resulting_images',
 
 				if 'DateTimeOriginal' in exif.keys():
 					original_time = exif['DateTimeOriginal']
-					creation_time = original_time[0:4] + '_' + original_time[5:7] + '_' + original_time[8:10] + '_' + \
-									original_time[11:13] + '_' + original_time[14:16] + '_' + original_time[17:19]
-					creation_year = int(original_time[0:4])
-					creation_month = int(original_time[5:7])
+					file_year = original_time[0:4]
+					file_month = original_time[5:7]
+					file_day = original_time[8:10]
+					file_hour = original_time[11:13]
+					file_min = original_time[14:16]
+					file_sec = original_time[17:19]
+
 		except:
 			original_time = None
 
 		if original_time is None:
-			original_time = time.gmtime(os.stat(img_path).st_birthtime)
-			creation_time = str(original_time.tm_year) + '_' + str(original_time.tm_mon).zfill(2) + '_' + \
-							str(original_time.tm_mday).zfill(2) + '_' + str(original_time.tm_hour).zfill(2) \
-							+ '_' + str(original_time.tm_min).zfill(2) + '_' + \
-							str(original_time.tm_sec).zfill(2)
-			creation_year = original_time.tm_year
-			creation_month = original_time.tm_mon
+			original_time = time.gmtime(os.stat(file_path).st_birthtime)
 
-		original_name = img_path
-		new_name = new_path + '/' + str(creation_year) + '/' + str(creation_year) + '_' + str(creation_month).zfill(
-			2) + '/' + creation_time + file_extension.lower()
-		if new_name in assigned_names:
-			repeated_counter = 0
-			repeated_name = True
-			while repeated_name:
-				repeated_counter += 1
-				new_name = new_path + '/' + str(creation_year) + '/' + str(creation_year) + '_' + str(
-					creation_month).zfill(2) + '/' + creation_time + '_' + str(
-					repeated_counter) + file_extension.lower()
-				if not (new_name in assigned_names):
-					repeated_name = False
+			file_year = str(original_time.tm_year)
+			file_month = str(original_time.tm_mon).zfill(2)
+			file_day = str(original_time.tm_mday).zfill(2)
+			file_hour = str(original_time.tm_hour).zfill(2)
+			file_min = str(original_time.tm_min).zfill(2)
+			file_sec = str(original_time.tm_sec).zfill(2)
 
-		if not (creation_year in assigned_years):
-			create_year_directory(str(creation_year), new_path)
-			assigned_years.append(creation_year)
+		return file_year, file_month, file_day, file_hour, file_min, file_sec
+
+	elif which_date == 'modified':
+
+		original_time = time.gmtime(os.path.getmtime(file_path))
+
+		file_year = str(original_time.tm_year)
+		file_month = str(original_time.tm_mon).zfill(2)
+		file_day = str(original_time.tm_mday).zfill(2)
+		file_hour = str(original_time.tm_hour).zfill(2)
+		file_min = str(original_time.tm_min).zfill(2)
+		file_sec = str(original_time.tm_sec).zfill(2)
+
+		return file_year, file_month, file_day, file_hour, file_min, file_sec
+
+
+def create_file_name_from_date(file_date):
+	return '_'.join(file_date)
+
+
+def create_new_complete_file_path(assigned_names, assigned_years, file_date, new_file_path, destination_path, file_extension):
+
+	file_year, file_month, file_day, file_hour, file_min, file_sec = file_date
+	new_file_name = create_file_name_from_date(file_date)
+	new_complete_file_path = new_file_path + '/' + new_file_name + file_extension.lower()
+
+	if new_complete_file_path in assigned_names:
+		repeated_counter = 0
+		repeated_name = True
+		while repeated_name:
+			repeated_counter += 1
+			new_complete_file_path = new_file_path + '/' + new_file_name + '_' + str(repeated_counter) + file_extension.lower()
+			if not (new_complete_file_path in assigned_names):
+				repeated_name = False
+
+	if not (file_year in assigned_years):
+		create_year_directory(str(file_year), destination_path)
+		assigned_years.append(file_year)
+
+	return new_complete_file_path
+
+
+def move_files(source_path='other_images', resulting_path='resulting_images', copy_file_extensions=('.jpg', '.jpeg', '.png'), new_name=True):
+	if not os.path.exists(resulting_path):
+		os.makedirs(resulting_path)
+
+	file_names = find_all_files(source_path, copy_file_extensions)
+
+	assigned_names = []
+	assigned_years = []
+
+	for original_complete_file_path in file_names:
+
+		original_file_path, _ = os.path.splitext(original_complete_file_path)
+		original_file_name, file_extension = os.path.splitext(os.path.basename(original_complete_file_path))
+
+		file_date = get_file_date(original_complete_file_path)
+		file_year, file_month, file_day, file_hour, file_min, file_sec = file_date
+
+		new_file_path = resulting_path + '/' + file_year + '/' + file_year + '_' + file_month
+
+		if new_name:
+			new_complete_file_path = create_new_complete_file_path(assigned_names, assigned_years, file_date, new_file_path, resulting_path, file_extension)
+		else:
+			new_complete_file_path = new_file_path + '/' + original_file_name + file_extension.lower()
 
 		if mute == 'false':
-			print(f"{original_name} -> {new_name}")
+			print(f"{original_complete_file_path} -> {new_complete_file_path}")
 
 		if copy == 'false':
-			rename(original_name, new_name)
+			rename(original_complete_file_path, new_complete_file_path)
 		else:
-			shutil.copy2(original_name, new_name)
+			shutil.copy2(original_complete_file_path, new_complete_file_path)
 
-		assigned_names.append(new_name)
+		assigned_names.append(new_complete_file_path)
 
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
-									description=textwrap.dedent('''
+									 description=textwrap.dedent('''
 									
 									
 									
@@ -110,7 +153,7 @@ if __name__ == '__main__':
 									
 									
 									'''),
-									epilog=textwrap.dedent('''
+									 epilog=textwrap.dedent('''
 			Some examples:
 			--------------
 			
@@ -136,8 +179,6 @@ if __name__ == '__main__':
 	parser.add_argument('-r', '--rename', default='false',
 						help="boolean variable that decides whether the file name changes or not")
 
-	# python move_chronologically.py -s other_images -d results -e .jpg .heic -m true
-
 	args = parser.parse_args()
 
 	folder_path = args.source
@@ -147,6 +188,4 @@ if __name__ == '__main__':
 	copy = args.copy
 	file_rename = args.rename
 
-	copy_files(folder_path=folder_path,
-			   resulting_folder=resulting_folder,
-			   copy_file_extensions=extension)
+	move_files(source_path=folder_path, resulting_path=resulting_folder, copy_file_extensions=extension)
