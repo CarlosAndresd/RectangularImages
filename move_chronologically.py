@@ -20,14 +20,16 @@ def find_all_files(source_directory_path, copy_file_extensions=''):
 
 	for (directory_path, _, filenames) in walk(source_directory_path):
 		for single_file in filenames:
-			complete_path = directory_path + '/' + single_file
-			_, file_extension = os.path.splitext(complete_path)
+			if single_file != '.DS_Store':
+				# print(single_file)
+				complete_path = directory_path + '/' + single_file
+				_, file_extension = os.path.splitext(complete_path)
 
-			if copy_file_extensions == '':
-				file_names.append(complete_path)
-			else:
-				if file_extension.lower() in copy_file_extensions:
+				if copy_file_extensions == '':
 					file_names.append(complete_path)
+				else:
+					if file_extension.lower() in copy_file_extensions:
+						file_names.append(complete_path)
 
 	return file_names
 
