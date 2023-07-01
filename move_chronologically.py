@@ -145,7 +145,7 @@ if __name__ == '__main__':
 	extension = args.extension
 	mute = args.mute
 	copy = args.copy
-	rename = args.rename
+	file_rename = args.rename
 
 	copy_files(folder_path=folder_path,
 			   resulting_folder=resulting_folder,
