@@ -1,6 +1,8 @@
 import os.path, time
 from PIL import Image, ExifTags
 from os import walk, rename
+import argparse
+import shutil
 
 
 def create_year_directory(year, source_path):
@@ -85,10 +87,35 @@ def copy_files(folder_path='other_images', resulting_folder='resulting_images',
 			create_year_directory(str(creation_year), new_path)
 			assigned_years.append(creation_year)
 
-		rename(original_name, new_name)
-		print(f"{original_name} -> {new_name}")
+		if mute == 'false':
+			print(f"{original_name} -> {new_name}")
+
+		if copy == 'false':
+			rename(original_name, new_name)
+		else:
+			shutil.copy2(original_name, new_name)
+
 		assigned_names.append(new_name)
 
 
 if __name__ == '__main__':
-	copy_files(copy_file_extensions=('.heic'))
+
+	parser = argparse.ArgumentParser(description='Organise files by date in a separate directory')
+
+	parser.add_argument('-s', '--source', default='other_images')
+	parser.add_argument('-d', '--destination', default='resulting_images')
+	parser.add_argument('-e', '--extension', nargs='+', default=('.jpg', '.jpeg', '.png'))
+	parser.add_argument('-m', '--mute', default='false')
+	parser.add_argument('-c', '--copy', default='false')
+
+	args = parser.parse_args()
+
+	folder_path = args.source
+	resulting_folder = args.destination
+	extension = args.extension
+	mute = args.mute
+	copy = args.copy
+
+	copy_files(folder_path=folder_path,
+			   resulting_folder=resulting_folder,
+			   copy_file_extensions=extension)
