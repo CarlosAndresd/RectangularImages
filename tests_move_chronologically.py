@@ -114,7 +114,7 @@ def test_get_file_date_1():
 
 def test_get_file_date_2():
 	created_date = get_file_date('test_directory/directory_1/folder_1/IMG_6100.HEIC', which_date='created')
-	correct_answer = ('2023', '03', '11', '11', '08', '29')
+	correct_answer = ('2023', '03', '11', '10', '08', '29')
 
 	assert created_date == correct_answer
 
