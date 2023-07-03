@@ -1,10 +1,19 @@
 import tkinter as tk
 from tkinter import ttk
 from PIL import ImageTk, Image
-from os import walk
+from os import walk, rename, remove
 import os.path
 
-global image_index, current_image_path
+global image_index, current_image_path, save_images_directory_path, num_images
+
+
+def create_directory(directory_name, source_path='images_GUI'):
+	complete_path = source_path + '/' + directory_name
+	if not os.path.exists(complete_path):
+		os.makedirs(complete_path)
+
+	return complete_path
+
 
 def find_all_files(source_directory_path='images_GUI', copy_file_extensions=('.jpg', '.png', '.jpeg')):
 	file_names = []
@@ -22,19 +31,42 @@ def find_all_files(source_directory_path='images_GUI', copy_file_extensions=('.j
 	return file_names
 
 
+def move_image():
+	file_name = os.path.basename(current_image_path)
+	rename(current_image_path, save_images_directory_path + '/' + file_name)
+
+
 def next_image(event):
 
 	global image_index
 	global current_image_path
 
+	remove(current_image_path)
+
 	image_index += 1
-	current_image_path = all_images_path[image_index]
-	update_image()
-	print('next image')
+	if image_index < num_images:
+		current_image_path = all_images_path[image_index]
+		update_image()
+		print('next image')
+	else:
+		root.destroy()
+
 
 
 def save_image(event):
-	print('save image')
+
+	global image_index
+	global current_image_path
+
+	move_image()
+
+	image_index += 1
+	if image_index < num_images:
+		current_image_path = all_images_path[image_index]
+		update_image()
+		print('save image')
+	else:
+		root.destroy()
 
 
 def entered_text(event):
@@ -46,6 +78,7 @@ def entered_text(event):
 
 
 def update_image():
+	text_label.config(text=f'Image {image_index+1} of {num_images}', font=("Helvetica", 40))
 
 	print(f'Current image = {current_image_path}')
 	original_image = Image.open(current_image_path)
@@ -110,19 +143,28 @@ text_input_frame.place(relx=0.5, rely=0.8, anchor=tk.CENTER)
 image_label = tk.Label(image_frame)
 image_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
+text_label = tk.Label(root)
+text_label.place(relx=0.7, rely=0.9, anchor=tk.CENTER)
+
 
 all_images_path = find_all_files()
+num_images = len(all_images_path)
 selected_images = []
 image_index = 0
 current_image_path = all_images_path[image_index]
 update_image()
 
-inputtxt = tk.Text(text_input_frame,height=5,width=20)
+inputtxt = tk.Text(text_input_frame, height=1, width=20, font=("Helvetica", 40))
 inputtxt.pack()
 inputtxt.bind('<Right>', next_image)
 inputtxt.bind('<Down>', save_image)
 inputtxt.bind('<Return>', entered_text)
 inputtxt.bind("<Shift_L>", window_resize)
 inputtxt.focus()
+
+
+
+
+save_images_directory_path = create_directory('saved_images')
 
 root.mainloop()
