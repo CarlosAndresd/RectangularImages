@@ -3,11 +3,15 @@ from tkinter import ttk
 from PIL import ImageTk, Image
 from os import walk, rename, remove
 import os.path
+import datetime
 
 global image_index, current_image_path, save_images_directory_path, num_images
 
+name_source_path = 'images_GUI'
+name_saved_path = 'saved_images'
 
-def create_directory(directory_name, source_path='images_GUI'):
+
+def create_directory(directory_name, source_path=name_source_path):
 	complete_path = source_path + '/' + directory_name
 	if not os.path.exists(complete_path):
 		os.makedirs(complete_path)
@@ -15,31 +19,50 @@ def create_directory(directory_name, source_path='images_GUI'):
 	return complete_path
 
 
-def find_all_files(source_directory_path='images_GUI', copy_file_extensions=('.jpg', '.png', '.jpeg')):
+def find_all_files(source_directory_path=name_source_path, copy_file_extensions=('.jpg', '.png', '.jpeg')):
 	file_names = []
 
-	for (directory_path, _, filenames) in walk(source_directory_path):
-		for single_file in filenames:
-			if single_file != '.DS_Store':
-				# print(single_file)
-				complete_path = directory_path + '/' + single_file
-				_, file_extension = os.path.splitext(complete_path)
+	for (directory_path, directory_name, filenames) in walk(source_directory_path):
+		if directory_path != name_source_path + '/' + name_saved_path:
+			for single_file in filenames:
+				if single_file != '.DS_Store':
+					# print(single_file)
+					complete_path = directory_path + '/' + single_file
+					_, file_extension = os.path.splitext(complete_path)
 
-				if file_extension.lower() in copy_file_extensions:
-					file_names.append(complete_path)
+					if file_extension.lower() in copy_file_extensions:
+						file_names.append(complete_path)
 
 	return file_names
 
 
 def move_image():
 	file_name = os.path.basename(current_image_path)
-	rename(current_image_path, save_images_directory_path + '/' + file_name)
+	original_file_name, file_extension = os.path.splitext(file_name)
+	new_name = save_images_directory_path + '/' + file_name
+
+	# This is necessary, in case the file already exists
+	copy_counter = 0
+	moved_image = False
+	while not moved_image:
+		if not os.path.exists(new_name):
+			rename(current_image_path, new_name)
+			moved_image = True
+		else:
+			copy_counter += 1
+			new_name = save_images_directory_path + '/' + original_file_name + '_' + str(copy_counter) + file_extension
+
+
+
 
 
 def next_image(event):
 
 	global image_index
 	global current_image_path
+
+	now = datetime.datetime.now()
+	file_log.write('\tREMOVED\t\t' + str(now)[:19] + '\t' + current_image_path + '\n')
 
 	remove(current_image_path)
 
@@ -57,6 +80,9 @@ def save_image(event):
 
 	global image_index
 	global current_image_path
+
+	now = datetime.datetime.now()
+	file_log.write('\tSAVED\t\t' + str(now)[:19] + '\t' + current_image_path + '\n')
 
 	move_image()
 
@@ -162,9 +188,8 @@ inputtxt.bind('<Return>', entered_text)
 inputtxt.bind("<Shift_L>", window_resize)
 inputtxt.focus()
 
+file_log = open(name_source_path + '/image_changes.txt', 'a')
 
-
-
-save_images_directory_path = create_directory('saved_images')
+save_images_directory_path = create_directory(name_saved_path)
 
 root.mainloop()
