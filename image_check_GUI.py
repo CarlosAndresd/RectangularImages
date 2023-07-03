@@ -72,7 +72,20 @@ def next_image(event):
 		update_image()
 		print('next image')
 	else:
-		root.destroy()
+		no_more_photos()
+
+
+def no_more_photos():
+
+	print('no more photos')
+
+	image_frame.destroy()
+	image_label.destroy()
+
+	text_label.config(text="Type 'exit'", font=("Helvetica", 40))
+
+	text_label.place(relx=0.5, rely=0.3, anchor=tk.CENTER)
+	text_input_frame.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
 
 
 
@@ -92,15 +105,37 @@ def save_image(event):
 		update_image()
 		print('save image')
 	else:
-		root.destroy()
+		no_more_photos()
 
 
 def entered_text(event):
 	inp = inputtxt.get(1.0, "end-1c")
+	inp = inp.replace('\n', '')
 	print(f'Text = {inp}')
 	inputtxt.delete(1.0, tk.END)
 	if inp.lower() == 'exit':
 		root.destroy()
+	elif inp.lower() == 'start':
+		start_process()
+
+
+def start_process():
+	global all_images_path, num_images, image_index, current_image_path
+
+	all_images_path = find_all_files()
+	num_images = len(all_images_path)
+	image_index = 0
+	if len(all_images_path) > 0:
+
+		image_frame.place(relx=0.5, rely=0.4, anchor=tk.CENTER, relwidth=0.7, relheight=0.7)
+		text_input_frame.place(relx=0.5, rely=0.8, anchor=tk.CENTER)
+		image_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+		text_label.place(relx=0.7, rely=0.9, anchor=tk.CENTER)
+
+		current_image_path = all_images_path[image_index]
+		update_image()
+	else:
+		print('no images')
 
 
 def update_image():
@@ -160,25 +195,15 @@ root.geometry('%dx%d+%d+%d' % (w, h, x, y))
 
 
 image_frame = tk.Frame(root)
-image_frame.place(relx=0.5, rely=0.4, anchor=tk.CENTER, relwidth=0.7, relheight=0.7)
-
-
 text_input_frame = ttk.Frame(root)
-text_input_frame.place(relx=0.5, rely=0.8, anchor=tk.CENTER)
-
 image_label = tk.Label(image_frame)
-image_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-
 text_label = tk.Label(root)
-text_label.place(relx=0.7, rely=0.9, anchor=tk.CENTER)
 
+text_label.config(text="Type 'start'", font=("Helvetica", 40))
 
-all_images_path = find_all_files()
-num_images = len(all_images_path)
-selected_images = []
-image_index = 0
-current_image_path = all_images_path[image_index]
-update_image()
+text_label.place(relx=0.5, rely=0.3, anchor=tk.CENTER)
+text_input_frame.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
+
 
 inputtxt = tk.Text(text_input_frame, height=1, width=20, font=("Helvetica", 40))
 inputtxt.pack()
