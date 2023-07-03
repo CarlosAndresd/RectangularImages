@@ -4,7 +4,7 @@ from PIL import ImageTk, Image
 from os import walk
 import os.path
 
-global image_index
+global image_index, current_image_path
 
 def find_all_files(source_directory_path='images_GUI', copy_file_extensions=('.jpg', '.png', '.jpeg')):
 	file_names = []
@@ -25,10 +25,11 @@ def find_all_files(source_directory_path='images_GUI', copy_file_extensions=('.j
 def next_image(event):
 
 	global image_index
+	global current_image_path
 
 	image_index += 1
 	current_image_path = all_images_path[image_index]
-	update_image(current_image_path)
+	update_image()
 	print('next image')
 
 
@@ -44,21 +45,40 @@ def entered_text(event):
 		root.destroy()
 
 
-def update_image(image_path):
+def update_image():
 
-	print(f'Current image = {image_path}')
-	original_image = Image.open(image_path)
+	print(f'Current image = {current_image_path}')
+	original_image = Image.open(current_image_path)
+
+	image_height = original_image.size[1]
+	image_width = original_image.size[0]
+
+	image_as = image_width/image_height
 
 	image_frame.update()
 	image_frame_width = image_frame.winfo_width()
 	image_frame_height = image_frame.winfo_height()
 
-	print(f'width = {image_frame_width}, height = {image_frame_height}')
+	frame_as = image_frame_width/image_frame_height
 
-	resized = original_image.resize((image_frame_width, image_frame_height), Image.LANCZOS)
+	if image_as > frame_as:
+		new_image_width = int(round(image_frame_width))
+		new_image_height = int(round((1/image_as)*image_frame_width))
+	else:
+		new_image_height = int(round(image_frame_height))
+		new_image_width = int(round(image_as*image_frame_height))
+
+	print(f'width = {new_image_width}, height = {new_image_height}')
+
+	resized = original_image.resize((new_image_width, new_image_height), Image.LANCZOS)
 	img = ImageTk.PhotoImage(resized)
 	image_label.image = img
 	image_label.config(image=img)
+
+
+def window_resize(event):
+	update_image()
+	print(event)
 
 
 root = tk.Tk()
@@ -79,27 +99,30 @@ y = (hs/2) - (h/2)
 # and where it is placed
 root.geometry('%dx%d+%d+%d' % (w, h, x, y))
 
-image_frame = tk.Frame(root, bg='grey')
-image_frame.place(relx=0.5, rely=0.4, anchor=tk.CENTER, relwidth=0.4, relheight=0.4)
+
+image_frame = tk.Frame(root)
+image_frame.place(relx=0.5, rely=0.4, anchor=tk.CENTER, relwidth=0.7, relheight=0.7)
+
 
 text_input_frame = ttk.Frame(root)
 text_input_frame.place(relx=0.5, rely=0.8, anchor=tk.CENTER)
 
 image_label = tk.Label(image_frame)
-image_label.pack()
+image_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
 
 all_images_path = find_all_files()
 selected_images = []
 image_index = 0
 current_image_path = all_images_path[image_index]
-update_image(current_image_path)
+update_image()
 
 inputtxt = tk.Text(text_input_frame,height=5,width=20)
 inputtxt.pack()
 inputtxt.bind('<Right>', next_image)
 inputtxt.bind('<Down>', save_image)
 inputtxt.bind('<Return>', entered_text)
+inputtxt.bind("<Shift_L>", window_resize)
 inputtxt.focus()
 
 root.mainloop()
