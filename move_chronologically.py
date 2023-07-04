@@ -168,7 +168,7 @@ if __name__ == '__main__':
 			.
 	         '''))
 
-	parser.add_argument('-s', '--source', default='other_images',
+	parser.add_argument('-s', '--source', default='source_images',
 						help="this is the path to the source directory, by default it is 'other_images'")
 	parser.add_argument('-d', '--destination', default='resulting_images',
 						help="this is the path to the destination directory, by default it is 'resulting_images'")
