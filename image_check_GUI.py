@@ -9,8 +9,9 @@ import shutil
 global image_index, current_image_path, num_images, movement_records, directory_dictionary, file_log
 
 name_source_path = 'images_GUI'
-name_saved_path = 'saved_images'
-name_removed_path = 'removed_images'
+root_sorted_path = 'sorted_images'
+name_saved_path = root_sorted_path + '/saved_images'
+name_removed_path = root_sorted_path + '/removed_images'
 
 
 def create_directory(directory_name, source_path=name_source_path):
@@ -21,11 +22,11 @@ def create_directory(directory_name, source_path=name_source_path):
 	return complete_path
 
 
-def find_all_files(source_directory_path=name_source_path, copy_file_extensions=('.jpg', '.png', '.jpeg')):
+def find_all_files(source_directory_path=name_source_path, copy_file_extensions=('.jpg', '.png', '.jpeg'), filter_results=True):
 	file_names = []
 
 	for (directory_path, directory_name, filenames) in walk(source_directory_path):
-		if directory_path != name_source_path + '/' + name_saved_path:
+		if (not (root_sorted_path in directory_path)) or not filter_results:
 			for single_file in filenames:
 				if single_file != '.DS_Store':
 					# print(single_file)
@@ -65,7 +66,7 @@ def undo(event):
 	old_path = last_movement[1]
 	new_path = last_movement[0]
 	now = datetime.datetime.now()
-	file_log.write('\tUNDO\t\t' + str(now)[:19] + '\t' + old_path + ' -> ' + new_path + '\n')
+	file_log.write('\tUNDO\t\t\t' + str(now)[:19] + '\t' + old_path + ' -> ' + new_path + '\n')
 	rename(old_path, new_path)
 	image_index -= 1
 	current_image_path = all_images_path[image_index]
@@ -113,14 +114,15 @@ def no_more_photos():
 
 	print('no more photos')
 
+	file_log.close()
+
 	image_frame.destroy()
 	image_label.destroy()
 
-	text_label.config(text="Type 'exit'", font=("Helvetica", 40))
+	text_label.config(text="No more photos. Type 'exit'", font=("Helvetica", 40))
 
 	text_label.place(relx=0.5, rely=0.3, anchor=tk.CENTER)
 	text_input_frame.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
-
 
 
 def t_program():
@@ -135,27 +137,211 @@ def t_program():
 	shutil.copytree(reference_test_path, name_source_path)
 
 	start_process(source_directory_path=name_source_path)
-	print(all_images_path)
+	answer_1 = set(find_all_files(source_directory_path=name_source_path, filter_results=False))
 
-	# Test 'saving' and 'removing' images
-	next_image('Right')
-	next_image('Down')
-	next_image('Right')
-	next_image('Right')
-	next_image('Down')
+	correct_answer_1 = {
+		'test_directory/file_20.PNG',
+		'test_directory/file_15.JPG',
+		'test_directory/directory_3/file_19.JPG',
+		'test_directory/directory_3/file_4.PNG',
+		'test_directory/directory_3/file_22.JPG',
+		'test_directory/directory_3/file_15.JPG',
+		'test_directory/directory_2/file_23.JPG',
+		'test_directory/directory_2/file_3.JPG',
+		'test_directory/directory_2/file_2.png',
+		'test_directory/directory_2/directory_7/file_20.PNG',
+		'test_directory/directory_2/directory_7/file_11.jpg',
+		'test_directory/directory_2/directory_6/file_3.JPG',
+		'test_directory/directory_2/directory_6/file_9.png',
+		'test_directory/directory_1/file_4.PNG',
+		'test_directory/directory_1/file_3.JPG',
+		'test_directory/directory_1/file_2.png',
+		'test_directory/directory_1/file_11.jpg',
+		'test_directory/directory_1/file_15.JPG',
+		'test_directory/directory_1/directory_4/file_4.PNG',
+		'test_directory/directory_1/directory_4/file_18.PNG',
+		'test_directory/directory_1/directory_4/file_13.PNG',
+		'test_directory/directory_1/directory_4/directory_8/file_17.jpg',
+		'test_directory/directory_1/directory_4/directory_8/directory_9/file_7.JPG',
+		'test_directory/directory_1/directory_4/directory_8/directory_9/file_22.JPG',
+		'test_directory/directory_1/directory_5/file_2.png',
+		'test_directory/directory_1/directory_5/directory_10/file_7.JPG'
+	}
 
-	# Test the undo functionality
-	next_image('Down')
-	undo('event')
-	next_image('Right')
-	next_image('Right')
+	next_image('Right')  # 1
+	next_image('Right')  # 2
+	next_image('Right')  # 3
+	next_image('Right')  # 4
+	next_image('Down')  # 5
+	next_image('Right')  # 6
+	next_image('Right')  # 7
+	undo('event')  # 8
+	next_image('Down')  # 9
+	next_image('Right')  # 10
+	next_image('Down')  # 11
+	next_image('Down')  # 12
+	undo('event')  # 13
+	next_image('Right')  # 14
+	next_image('Down')  # 15
+	other_input('ab')  # 16
+	next_image('Down')  # 17
+	next_image('Right')  # 18
+	other_input('ac')  # 19
+	undo('event')  # 20
+	other_input('ab')  # 21
+	next_image('Down')  # 22
 
+	answer_2 = set(find_all_files(source_directory_path=name_source_path, filter_results=False))
+
+	correct_answer_2 = {
+		'test_directory/sorted_images/removed_images/file_19.JPG',
+		'test_directory/sorted_images/removed_images/file_4.PNG',
+		'test_directory/sorted_images/removed_images/file_20.PNG',
+		'test_directory/sorted_images/removed_images/file_15_1.JPG',
+		'test_directory/sorted_images/removed_images/file_3.JPG',
+		'test_directory/sorted_images/removed_images/file_15.JPG',
+		'test_directory/sorted_images/removed_images/file_20_1.PNG',
+		'test_directory/sorted_images/removed_images/file_4_1.PNG',
+		'test_directory/sorted_images/ab/file_3.JPG',
+		'test_directory/sorted_images/ab/file_3_1.JPG',
+		'test_directory/sorted_images/saved_images/file_23.JPG',
+		'test_directory/sorted_images/saved_images/file_2.png',
+		'test_directory/sorted_images/saved_images/file_22.JPG',
+		'test_directory/sorted_images/saved_images/file_11.jpg',
+		'test_directory/sorted_images/saved_images/file_9.png',
+		'test_directory/sorted_images/saved_images/file_2_1.png',
+		'test_directory/directory_1/file_11.jpg',
+		'test_directory/directory_1/file_15.JPG',
+		'test_directory/directory_1/directory_4/file_4.PNG',
+		'test_directory/directory_1/directory_4/file_18.PNG',
+		'test_directory/directory_1/directory_4/file_13.PNG',
+		'test_directory/directory_1/directory_4/directory_8/file_17.jpg',
+		'test_directory/directory_1/directory_4/directory_8/directory_9/file_7.JPG',
+		'test_directory/directory_1/directory_4/directory_8/directory_9/file_22.JPG',
+		'test_directory/directory_1/directory_5/file_2.png',
+		'test_directory/directory_1/directory_5/directory_10/file_7.JPG'
+	}
+
+	next_image('Down')  # 23
+	next_image('Right')  # 24
+	next_image('Right')  # 25
+	other_input('1121')  # 26
+	next_image('Down')  # 27
+	undo('event')  # 28
+	undo('event')  # 29
+	undo('event')  # 30
+	undo('event')  # 31
+	other_input('new')  # 32
+	next_image('Right')  # 33
+	other_input('1122')  # 34
+	next_image('Down')  # 35
+	next_image('Down')  # 36
+
+	answer_3 = set(find_all_files(source_directory_path=name_source_path, filter_results=False))
+
+	correct_answer_3 = {
+		'test_directory/sorted_images/removed_images/file_19.JPG',
+		'test_directory/sorted_images/removed_images/file_4.PNG',
+		'test_directory/sorted_images/removed_images/file_20.PNG',
+		'test_directory/sorted_images/removed_images/file_15_1.JPG',
+		'test_directory/sorted_images/removed_images/file_3.JPG',
+		'test_directory/sorted_images/removed_images/file_15.JPG',
+		'test_directory/sorted_images/removed_images/file_20_1.PNG',
+		'test_directory/sorted_images/removed_images/file_4_2.PNG',
+		'test_directory/sorted_images/removed_images/file_4_1.PNG',
+		'test_directory/sorted_images/1122/file_18.PNG',
+		'test_directory/sorted_images/ab/file_3.JPG',
+		'test_directory/sorted_images/ab/file_3_1.JPG',
+		'test_directory/sorted_images/saved_images/file_11_1.jpg',
+		'test_directory/sorted_images/saved_images/file_23.JPG',
+		'test_directory/sorted_images/saved_images/file_2.png',
+		'test_directory/sorted_images/saved_images/file_22.JPG',
+		'test_directory/sorted_images/saved_images/file_13.PNG',
+		'test_directory/sorted_images/saved_images/file_11.jpg',
+		'test_directory/sorted_images/saved_images/file_9.png',
+		'test_directory/sorted_images/saved_images/file_17.jpg',
+		'test_directory/sorted_images/saved_images/file_2_1.png',
+		'test_directory/sorted_images/new/file_15.JPG',
+		'test_directory/directory_1/directory_4/directory_8/directory_9/file_7.JPG',
+		'test_directory/directory_1/directory_4/directory_8/directory_9/file_22.JPG',
+		'test_directory/directory_1/directory_5/file_2.png',
+		'test_directory/directory_1/directory_5/directory_10/file_7.JPG'
+	}
+
+	next_image('Down')  # 37
+	other_input('ac')  # 38
+	other_input('new')  # 39
+	undo('event')  # 40
+	other_input('1122')  # 41
+	next_image('Down')  # 42
+
+	answer_4 = set(find_all_files(source_directory_path=name_source_path, filter_results=False))
+
+	correct_answer_4 = {
+		'test_directory/sorted_images/removed_images/file_19.JPG',
+		'test_directory/sorted_images/removed_images/file_4.PNG',
+		'test_directory/sorted_images/removed_images/file_20.PNG',
+		'test_directory/sorted_images/removed_images/file_15_1.JPG',
+		'test_directory/sorted_images/removed_images/file_3.JPG',
+		'test_directory/sorted_images/removed_images/file_15.JPG',
+		'test_directory/sorted_images/removed_images/file_20_1.PNG',
+		'test_directory/sorted_images/removed_images/file_4_2.PNG',
+		'test_directory/sorted_images/removed_images/file_4_1.PNG',
+		'test_directory/sorted_images/ac/file_22.JPG',
+		'test_directory/sorted_images/1122/file_18.PNG',
+		'test_directory/sorted_images/1122/file_2.png',
+		'test_directory/sorted_images/ab/file_3.JPG',
+		'test_directory/sorted_images/ab/file_3_1.JPG',
+		'test_directory/sorted_images/saved_images/file_7.JPG',
+		'test_directory/sorted_images/saved_images/file_11_1.jpg',
+		'test_directory/sorted_images/saved_images/file_23.JPG',
+		'test_directory/sorted_images/saved_images/file_2.png',
+		'test_directory/sorted_images/saved_images/file_22.JPG',
+		'test_directory/sorted_images/saved_images/file_13.PNG',
+		'test_directory/sorted_images/saved_images/file_7_1.JPG',
+		'test_directory/sorted_images/saved_images/file_11.jpg',
+		'test_directory/sorted_images/saved_images/file_9.png',
+		'test_directory/sorted_images/saved_images/file_17.jpg',
+		'test_directory/sorted_images/saved_images/file_2_1.png',
+		'test_directory/sorted_images/new/file_15.JPG',
+	}
+
+	all_tests_passed = True
+
+	if answer_1 == correct_answer_1:
+		print('Test 1 passed')
+	else:
+		print('Test 1 NOT passed')
+		all_tests_passed = False
+
+	if answer_2 == correct_answer_2:
+		print('Test 2 passed')
+	else:
+		print('Test 2 NOT passed')
+		all_tests_passed = False
+
+	if answer_3 == correct_answer_3:
+		print('Test 3 passed')
+	else:
+		print('Test 3 NOT passed')
+		all_tests_passed = False
+
+	if answer_4 == correct_answer_4:
+		print('Test 4 passed')
+	else:
+		print('Test 4 NOT passed')
+		all_tests_passed = False
+
+	if all_tests_passed:
+		information_text_label.config(text='All tests passed', font=("Helvetica", 30))
+	else:
+		information_text_label.config(text='Some testst failed', font=("Helvetica", 30))
 
 
 def other_input(inp):
 	global directory_dictionary, image_index, current_image_path
 
-	directory_dictionary[inp] = create_directory(inp)
+	directory_dictionary[inp] = create_directory( root_sorted_path + '/' + inp, source_path=name_source_path)
 	now = datetime.datetime.now()
 	file_log.write('\tMoved to ' + inp + '\t\t' + str(now)[:19] + '\t' + current_image_path + '\n')
 	move_image(inp)
@@ -168,21 +354,25 @@ def other_input(inp):
 		no_more_photos()
 
 
+def exit_program():
+	root.destroy()
+
+
 def entered_text(event):
 
 	inp = inputtxt.get(1.0, "end-1c")
 	inp = inp.replace('\n', '')
-	print(f'Text = {inp}')
-	inputtxt.delete(1.0, tk.END)
-	if inp.lower() == 'exit':
-		root.destroy()
-	elif inp.lower() == 'start':
-		start_process()
-	elif inp.lower() == 'test':
-		t_program()
-	else:
-		other_input(inp)
-
+	if inp:
+		print(f'Text = {inp}')
+		inputtxt.delete(1.0, tk.END)
+		if inp.lower() == 'exit':
+			exit_program()
+		elif inp.lower() == 'start':
+			start_process()
+		elif inp.lower() == 'test':
+			t_program()
+		else:
+			other_input(inp)
 
 
 def start_process(source_directory_path=name_source_path):
@@ -197,8 +387,8 @@ def start_process(source_directory_path=name_source_path):
 	if len(all_images_path) > 0:
 
 		movement_records = []
-		save_images_directory_path = create_directory(name_saved_path)
-		removed_images_directory_path = create_directory(name_removed_path)
+		save_images_directory_path = create_directory(name_saved_path, source_path=name_source_path)
+		removed_images_directory_path = create_directory(name_removed_path, source_path=name_source_path)
 
 		directory_dictionary = {'saved': save_images_directory_path, 'removed': removed_images_directory_path}
 
@@ -206,6 +396,7 @@ def start_process(source_directory_path=name_source_path):
 		text_input_frame.place(relx=0.5, rely=0.8, anchor=tk.CENTER)
 		image_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 		text_label.place(relx=0.7, rely=0.9, anchor=tk.CENTER)
+		information_text_label.place(relx=0.1, rely=0.025, anchor=tk.NW)
 
 		current_image_path = all_images_path[image_index]
 		update_image()
@@ -215,8 +406,9 @@ def start_process(source_directory_path=name_source_path):
 
 def update_image():
 	text_label.config(text=f'Image {image_index+1} of {num_images}', font=("Helvetica", 40))
+	information_text_label.config(text=current_image_path, font=("Helvetica", 30))
 
-	print(f'Current image = {current_image_path}')
+	# print(f'Current image = {current_image_path}')
 	original_image = Image.open(current_image_path)
 
 	image_height = original_image.size[1]
@@ -237,7 +429,7 @@ def update_image():
 		new_image_height = int(round(image_frame_height))
 		new_image_width = int(round(image_as*image_frame_height))
 
-	print(f'width = {new_image_width}, height = {new_image_height}')
+	# print(f'width = {new_image_width}, height = {new_image_height}')
 
 	resized = original_image.resize((new_image_width, new_image_height), Image.LANCZOS)
 	img = ImageTk.PhotoImage(resized)
@@ -273,11 +465,13 @@ image_frame = tk.Frame(root)
 text_input_frame = ttk.Frame(root)
 image_label = tk.Label(image_frame)
 text_label = tk.Label(root)
+information_text_label = tk.Label(root)
 
 text_label.config(text="Type 'start'", font=("Helvetica", 40))
 
 text_label.place(relx=0.5, rely=0.3, anchor=tk.CENTER)
 text_input_frame.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
+
 
 
 inputtxt = tk.Text(text_input_frame, height=1, width=20, font=("Helvetica", 40))
