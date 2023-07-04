@@ -4,8 +4,9 @@ from PIL import ImageTk, Image
 from os import walk, rename, remove
 import os.path
 import datetime
+import shutil
 
-global image_index, current_image_path, num_images, movement_records, directory_dictionary
+global image_index, current_image_path, num_images, movement_records, directory_dictionary, file_log
 
 name_source_path = 'images_GUI'
 name_saved_path = 'saved_images'
@@ -73,25 +74,39 @@ def undo(event):
 
 def next_image(event):
 
-	global image_index
-	global current_image_path
+	inp = inputtxt.get(1.0, "end-1c")
+	inp = inp.replace('\n', '')
 
-	now = datetime.datetime.now()
+	try:
+		command = event.keysym
+	except:
+		command = event
 
-	if event.keysym == 'Right':
-		file_log.write('\tREMOVED\t\t' + str(now)[:19] + '\t' + current_image_path + '\n')
-		move_image('removed')
-	elif event.keysym == 'Down':
-		file_log.write('\tSAVED\t\t' + str(now)[:19] + '\t' + current_image_path + '\n')
-		move_image('saved')
+	if not inp:
+		# If the text input was empty
 
-	image_index += 1
-	if image_index < num_images:
-		current_image_path = all_images_path[image_index]
-		update_image()
-		print('next image')
+		global image_index
+		global current_image_path
+
+		now = datetime.datetime.now()
+
+		if command == 'Right':
+			file_log.write('\tREMOVED\t\t\t' + str(now)[:19] + '\t' + current_image_path + '\n')
+			move_image('removed')
+		elif command == 'Down':
+			file_log.write('\tSAVED\t\t\t' + str(now)[:19] + '\t' + current_image_path + '\n')
+			move_image('saved')
+
+		image_index += 1
+		if image_index < num_images:
+			current_image_path = all_images_path[image_index]
+			update_image()
+			print('next image')
+		else:
+			no_more_photos()
+
 	else:
-		no_more_photos()
+		entered_text('event')
 
 
 def no_more_photos():
@@ -107,7 +122,54 @@ def no_more_photos():
 	text_input_frame.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
 
 
+
+def t_program():
+	global name_source_path, file_log
+
+	name_source_path = 'test_directory'
+	reference_test_path = 'reference_test_directory'
+
+	if os.path.exists(name_source_path):
+		shutil.rmtree(name_source_path)
+
+	shutil.copytree(reference_test_path, name_source_path)
+
+	start_process(source_directory_path=name_source_path)
+	print(all_images_path)
+
+	# Test 'saving' and 'removing' images
+	next_image('Right')
+	next_image('Down')
+	next_image('Right')
+	next_image('Right')
+	next_image('Down')
+
+	# Test the undo functionality
+	next_image('Down')
+	undo('event')
+	next_image('Right')
+	next_image('Right')
+
+
+
+def other_input(inp):
+	global directory_dictionary, image_index, current_image_path
+
+	directory_dictionary[inp] = create_directory(inp)
+	now = datetime.datetime.now()
+	file_log.write('\tMoved to ' + inp + '\t\t' + str(now)[:19] + '\t' + current_image_path + '\n')
+	move_image(inp)
+	image_index += 1
+	if image_index < num_images:
+		current_image_path = all_images_path[image_index]
+		update_image()
+		print('next image')
+	else:
+		no_more_photos()
+
+
 def entered_text(event):
+
 	inp = inputtxt.get(1.0, "end-1c")
 	inp = inp.replace('\n', '')
 	print(f'Text = {inp}')
@@ -116,13 +178,20 @@ def entered_text(event):
 		root.destroy()
 	elif inp.lower() == 'start':
 		start_process()
+	elif inp.lower() == 'test':
+		t_program()
+	else:
+		other_input(inp)
 
 
-def start_process():
+
+def start_process(source_directory_path=name_source_path):
 	global all_images_path, num_images, image_index, current_image_path, movement_records
-	global directory_dictionary
+	global directory_dictionary, file_log
 
-	all_images_path = find_all_files()
+	file_log = open(source_directory_path + '/image_changes.txt', 'a')
+
+	all_images_path = find_all_files(source_directory_path=source_directory_path)
 	num_images = len(all_images_path)
 	image_index = 0
 	if len(all_images_path) > 0:
@@ -220,7 +289,7 @@ inputtxt.bind('<Return>', entered_text)
 inputtxt.bind("<Shift_L>", window_resize)
 inputtxt.focus()
 
-file_log = open(name_source_path + '/image_changes.txt', 'a')
+
 
 
 
