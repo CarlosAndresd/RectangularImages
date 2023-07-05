@@ -87,10 +87,9 @@ def create_file_name_from_date(file_date):
 	return '_'.join(file_date)
 
 
-def create_new_complete_file_path(assigned_names, assigned_years, file_date, new_file_path, destination_path, file_extension):
+def create_new_complete_file_path(assigned_names, assigned_years, file_date, new_file_path, destination_path, file_extension, new_file_name):
 
 	file_year, file_month, file_day, file_hour, file_min, file_sec = file_date
-	new_file_name = create_file_name_from_date(file_date)
 	new_complete_file_path = new_file_path + '/' + new_file_name + file_extension.lower()
 
 	if new_complete_file_path in assigned_names:
@@ -109,7 +108,7 @@ def create_new_complete_file_path(assigned_names, assigned_years, file_date, new
 	return new_complete_file_path
 
 
-def move_files(source_path='other_images', resulting_path='resulting_images', copy_file_extensions=('.jpg', '.jpeg', '.png'), new_name=True):
+def move_files(source_path='other_images', resulting_path='resulting_images', copy_file_extensions=('.jpg', '.jpeg', '.png'), sorting_date='created', new_name=True, mute='false', copy='false'):
 	if not os.path.exists(resulting_path):
 		os.makedirs(resulting_path)
 
@@ -123,15 +122,15 @@ def move_files(source_path='other_images', resulting_path='resulting_images', co
 		original_file_path, _ = os.path.splitext(original_complete_file_path)
 		original_file_name, file_extension = os.path.splitext(os.path.basename(original_complete_file_path))
 
-		file_date = get_file_date(original_complete_file_path)
+		file_date = get_file_date(original_complete_file_path, which_date=sorting_date)
 		file_year, file_month, file_day, file_hour, file_min, file_sec = file_date
 
 		new_file_path = resulting_path + '/' + file_year + '/' + file_year + '_' + file_month
 
 		if new_name:
-			new_complete_file_path = create_new_complete_file_path(assigned_names, assigned_years, file_date, new_file_path, resulting_path, file_extension)
+			new_complete_file_path = create_new_complete_file_path(assigned_names, assigned_years, file_date, new_file_path, resulting_path, file_extension, create_file_name_from_date(file_date))
 		else:
-			new_complete_file_path = new_file_path + '/' + original_file_name + file_extension.lower()
+			new_complete_file_path = create_new_complete_file_path(assigned_names, assigned_years, file_date, new_file_path, resulting_path, file_extension, original_file_name)
 
 		if mute == 'false':
 			print(f"{original_complete_file_path} -> {new_complete_file_path}")
