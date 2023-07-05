@@ -442,6 +442,115 @@ def test_move_files_4():
 	assert answer == correct_answer
 
 
+def test_special_cases_1():
+
+	name_source_path = 'test_results/test_directory'
+	reference_test_path = 'reference_test_directory'
+
+	if os.path.exists(name_source_path):
+		shutil.rmtree(name_source_path)
+
+	shutil.copytree(reference_test_path, name_source_path)
+
+	subprocess.run(['python', 'move_chronologically.py', '-s', 'test_results/test_directory', '-d',
+					'test_results/resulting_images', '-e', '.heic', '.jpg', '.png', '.jpeg', '-m', 'false', '-r',
+					'true', '-t' 'created', '-c', 'true', ])
+
+	all_files = set(find_all_files('test_results', copy_file_extensions=''))
+	shutil.rmtree('test_results')
+
+	should_contain = {
+		'test_results/resulting_images/2021/2021_05/2021_05_30_14_42_22.png',
+		'test_results/resulting_images/2021/2021_08/2021_08_20_12_50_05.jpeg',
+		'test_results/resulting_images/2022/2022_05/2022_05_06_14_42_07.png',
+		'test_results/resulting_images/2022/2022_05/2022_05_04_15_55_13.jpeg',
+	}
+
+	assert should_contain.issubset(all_files)
+
+
+def test_special_cases_2():
+
+	name_source_path = 'test_results/test_directory'
+	reference_test_path = 'reference_test_directory'
+
+	if os.path.exists(name_source_path):
+		shutil.rmtree(name_source_path)
+
+	shutil.copytree(reference_test_path, name_source_path)
+
+	subprocess.run(['python', 'move_chronologically.py', '-s', 'test_results/test_directory', '-d',
+					'test_results/resulting_images', '-e', '.heic', '.jpg', '.png', '.jpeg', '-m', 'false', '-r',
+					'true', '-t' 'modified', '-c', 'true', ])
+
+	all_files = set(find_all_files('test_results', copy_file_extensions=''))
+	shutil.rmtree('test_results')
+
+	should_contain = {
+		'test_results/resulting_images/2023/2023_07/2023_07_04_15_55_17.png',
+		'test_results/resulting_images/2023/2023_07/2023_07_04_15_54_27.jpeg',
+		'test_results/resulting_images/2023/2023_07/2023_07_04_15_54_01.png',
+		'test_results/resulting_images/2023/2023_07/2023_07_04_15_53_39.jpeg',
+	}
+
+	assert should_contain.issubset(all_files)
+
+
+def test_special_cases_3():
+
+	name_source_path = 'test_results/test_directory'
+	reference_test_path = 'reference_test_directory'
+
+	if os.path.exists(name_source_path):
+		shutil.rmtree(name_source_path)
+
+	shutil.copytree(reference_test_path, name_source_path)
+
+	subprocess.run(['python', 'move_chronologically.py', '-s', 'test_results/test_directory', '-d',
+					'test_results/resulting_images', '-e', '.heic', '.jpg', '.png', '.jpeg', '-m', 'false', '-r',
+					'false', '-t' 'created', '-c', 'true', ])
+
+	all_files = set(find_all_files('test_results', copy_file_extensions=''))
+	shutil.rmtree('test_results')
+
+	should_contain = {
+		'test_results/resulting_images/2021/2021_05/file_4.png',
+		'test_results/resulting_images/2021/2021_08/file_11.jpeg',
+		'test_results/resulting_images/2022/2022_05/file_20.png',
+		'test_results/resulting_images/2022/2022_05/file_23.jpeg',
+	}
+
+	assert should_contain.issubset(all_files)
+
+
+def test_special_cases_4():
+
+	name_source_path = 'test_results/test_directory'
+	reference_test_path = 'reference_test_directory'
+
+	if os.path.exists(name_source_path):
+		shutil.rmtree(name_source_path)
+
+	shutil.copytree(reference_test_path, name_source_path)
+
+	subprocess.run(['python', 'move_chronologically.py', '-s', 'test_results/test_directory', '-d',
+					'test_results/resulting_images', '-e', '.heic', '.jpg', '.png', '.jpeg', '-m', 'false', '-r',
+					'false', '-t' 'modified', '-c', 'true', ])
+
+	all_files = set(find_all_files('test_results', copy_file_extensions=''))
+	shutil.rmtree('test_results')
+
+	should_contain = {
+		'test_results/resulting_images/2023/2023_07/file_4.png',
+		'test_results/resulting_images/2023/2023_07/file_11.jpeg',
+		'test_results/resulting_images/2023/2023_07/file_20.png',
+		'test_results/resulting_images/2023/2023_07/file_23.jpeg',
+	}
+
+	assert should_contain.issubset(all_files)
+
+
+
 def test_overall_program_1():
 
 	name_source_path = 'test_results/test_directory'
