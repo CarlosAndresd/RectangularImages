@@ -108,7 +108,7 @@ def create_new_complete_file_path(assigned_names, assigned_years, file_date, new
 	return new_complete_file_path
 
 
-def move_files(source_path='other_images', resulting_path='resulting_images', copy_file_extensions=('.jpg', '.jpeg', '.png'), sorting_date='created', new_name=True, mute='false', copy='false'):
+def move_files(source_path='other_images', resulting_path='resulting_images', copy_file_extensions=('.jpg', '.jpeg', '.png'), sorting_date='created', new_name=True, mute=False, copy=False):
 	if not os.path.exists(resulting_path):
 		os.makedirs(resulting_path)
 
@@ -132,13 +132,13 @@ def move_files(source_path='other_images', resulting_path='resulting_images', co
 		else:
 			new_complete_file_path = create_new_complete_file_path(assigned_names, assigned_years, file_date, new_file_path, resulting_path, file_extension, original_file_name)
 
-		if mute == 'false':
+		if not mute:
 			print(f"{original_complete_file_path} -> {new_complete_file_path}")
 
-		if copy == 'false':
-			rename(original_complete_file_path, new_complete_file_path)
-		else:
+		if copy:
 			shutil.copy2(original_complete_file_path, new_complete_file_path)
+		else:
+			rename(original_complete_file_path, new_complete_file_path)
 
 		assigned_names.append(new_complete_file_path)
 
@@ -179,14 +179,29 @@ if __name__ == '__main__':
 						help="boolean variable that decides whether the files are copied or not. By default it moves the files")
 	parser.add_argument('-r', '--rename', default='false',
 						help="boolean variable that decides whether the file name changes or not")
+	parser.add_argument('-t', '--sorting', default='created',
+						help="boolean variable that decides whether the file name changes or not")
 
 	args = parser.parse_args()
 
 	folder_path = args.source
 	resulting_folder = args.destination
 	extension = args.extension
-	mute = args.mute
-	copy = args.copy
-	file_rename = args.rename
 
-	move_files(source_path=folder_path, resulting_path=resulting_folder, copy_file_extensions=extension)
+	if args.mute == 'false':
+		mute = False
+	else:
+		mute = True
+
+	if args.copy == 'false':
+		copy = False
+	else:
+		copy = True
+
+	if args.rename == 'false':
+		file_rename = False
+	else:
+		file_rename = True
+
+	move_files(source_path=folder_path, resulting_path=resulting_folder, copy_file_extensions=extension,
+			   sorting_date=args.sorting, new_name=file_rename, mute=mute, copy=copy)
