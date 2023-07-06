@@ -70,6 +70,21 @@ import textwrap
 
 
 def create_year_directory(year, source_path):
+	"""
+
+	This function creates a new directory for the given year and inside that directory it creates 12 directories for
+	each month
+
+	Parameters
+	----------
+	year: the name of the main directory
+	source_path: the path where the directory will be created
+
+	Returns
+	-------
+	None
+
+	"""
 	year_path = source_path + '/' + year
 	os.makedirs(year_path)
 
@@ -79,6 +94,22 @@ def create_year_directory(year, source_path):
 
 
 def find_all_files(source_directory_path, copy_file_extensions=''):
+	"""
+
+	This function finds all the files inside the given directory that have the provided extensions. It ignores
+	'.DS_Store' files
+
+	Parameters
+	----------
+	source_directory_path: path of the directory where to look
+	copy_file_extensions: a tuple containing the extensions to look for. If any extension is allowed, then it is an
+	empty string
+
+	Returns
+	-------
+	A list containing all the found files with relative path
+
+	"""
 	file_names = []
 
 	for (directory_path, _, filenames) in walk(source_directory_path):
@@ -98,6 +129,31 @@ def find_all_files(source_directory_path, copy_file_extensions=''):
 
 
 def get_file_date(file_path, which_date='created'):
+	"""
+
+	This function gets the desired date from a file. Either the created or the modified date.
+
+	Important! If the file contains exif information and the selected date is the creation date, the program will take
+    the creation date from the exif metadata. Keep in mind that this creation date does not account for different time
+    zones, it always uses UTC.
+
+	Parameters
+	----------
+	file_path: the path of the file.
+	which_date: either 'created' or 'modified'. By default, it is 'created'. If it is none of these strings, then it
+	becomes 'created'
+
+	Returns
+	-------
+	A tuple containing the information of the file creation/modification date
+
+	"""
+
+	which_date = which_date.lower()
+
+	if which_date != 'created' and which_date != 'modified':
+		which_date = 'created'
+
 	if which_date == 'created':
 
 		try:
@@ -147,11 +203,44 @@ def get_file_date(file_path, which_date='created'):
 
 
 def create_file_name_from_date(file_date):
+	"""
+
+	This function takes the file date and transforms it into a string
+
+	Parameters
+	----------
+	file_date: the tuple with file date information
+
+	Returns
+	-------
+	The string with the file date
+
+	"""
 	return '_'.join(file_date)
 
 
 def create_new_complete_file_path(assigned_names, assigned_years, file_date, new_file_path, destination_path,
 								  file_extension, new_file_name):
+	"""
+
+	This function creates the new complete path for the given file. It checks whether there are other files with that
+	name and if so it adds a number
+
+	Parameters
+	----------
+	assigned_names: list of all the names that have been assigned
+	assigned_years: list of all the years that have been assigned
+	file_date: the date of the file (tuple)
+	new_file_path: the path where the images are moved to
+	destination_path: path of the destination (I am not sure what is the difference with 'new_file_path')
+	file_extension: the extension of the file
+	new_file_name: the new file name, it could be the old file name or a new one depending on the date
+
+	Returns
+	-------
+	A string with the new file path
+
+	"""
 	file_year, file_month, file_day, file_hour, file_min, file_sec = file_date
 	new_complete_file_path = new_file_path + '/' + new_file_name + file_extension.lower()
 
@@ -175,6 +264,25 @@ def create_new_complete_file_path(assigned_names, assigned_years, file_date, new
 def move_files(source_path='other_images', resulting_path='resulting_images',
 			   copy_file_extensions=('.jpg', '.jpeg', '.png'), sorting_date='created', new_name=True, mute=False,
 			   copy=False):
+	"""
+
+	This is the function that actually moves the files depending on the information provided by the user.
+
+	Parameters
+	----------
+	source_path: this is the path to the source directory, by default it is 'other_images'
+	resulting_path: this is the path to the destination directory, by default it is 'resulting_images'
+	copy_file_extensions: these are the extensions that will be moved or copied, by default they are '.jpg', '.jpeg', '.png'
+	sorting_date: variable deciding whether the sorting date is the created or modified date, by default is created
+	new_name: variable that decides whether the file name changes or not
+	mute: variable that decides whether the copying/moving process is shown or not. By default, it shows the progress
+	copy: variable that decides whether the files are copied or not. By default it moves the files
+
+	Returns
+	-------
+	None
+
+	"""
 	if not os.path.exists(resulting_path):
 		os.makedirs(resulting_path)
 
@@ -244,13 +352,13 @@ if __name__ == '__main__':
 	parser.add_argument('-e', '--extension', nargs='+', default=('.jpg', '.jpeg', '.png'),
 						help="these are the extensions that will be moved or copied, by default they are '.jpg', '.jpeg', '.png'")
 	parser.add_argument('-m', '--mute', default='false',
-						help="boolean variable that decides whether the copying/moving process is shown or not. By default, it shows the progress")
+						help="variable that decides whether the copying/moving process is shown or not. By default, it shows the progress")
 	parser.add_argument('-c', '--copy', default='false',
-						help="boolean variable that decides whether the files are copied or not. By default it moves the files")
+						help="variable that decides whether the files are copied or not. By default it moves the files")
 	parser.add_argument('-r', '--rename', default='false',
-						help="boolean variable that decides whether the file name changes or not")
+						help="variable that decides whether the file name changes or not")
 	parser.add_argument('-t', '--sorting', default='created',
-						help="boolean variable that decides whether the file name changes or not")
+						help="variable deciding whether the sorting date is the created or modified date, by default is created")
 
 	args = parser.parse_args()
 
