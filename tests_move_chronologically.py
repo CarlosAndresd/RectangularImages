@@ -1,4 +1,47 @@
-import pytest
+"""
+
+=====================================================================
+move_chronologically, (:mod:`RectangularImages.move_chronologically`)
+=====================================================================
+
+Description
+-----------
+
+    This module contains has one single function: organise all the files in a selected directory by date, either created
+    date or modified date. It is primarily aimed at photos, since it looks for the exif information, but it should work
+    with any file.
+
+    Important! If the file contains exif information and the selected date is the creation date, the program will take
+    the creation date from the exif metadata. Keep in mind that this creation date does not account for different time
+    zones, it always uses UTC.
+
+Functions
+---------
+
+    How to add more 'overall_program' tests:
+
+    1. Copy and paste the following code
+
+def test_overall_program():
+
+	name_source_path = 'test_results/test_directory'
+	reference_test_path = 'reference_test_directory'
+
+	if os.path.exists(name_source_path):
+		shutil.rmtree(name_source_path)
+
+	shutil.copytree(reference_test_path, name_source_path)
+
+	# Replace this comment with the 5 lines that you copied from the Excel file Test_Photo_Information.xlsx
+
+	assert answer == correct_answer
+
+	2. Replace the comment with teh 5 lines that were copied from the Excel file Test_Photo_Information.xlsx.
+	In the Excel file you will find instructions on how to get these lines
+
+
+"""
+
 from move_chronologically import *
 import subprocess
 
@@ -453,7 +496,7 @@ def test_special_cases_1():
 	shutil.copytree(reference_test_path, name_source_path)
 
 	subprocess.run(['python', 'move_chronologically.py', '-s', 'test_results/test_directory', '-d',
-					'test_results/resulting_images', '-e', '.heic', '.jpg', '.png', '.jpeg', '-m', 'false', '-r',
+					'test_results/resulting_images', '-m', 'false', '-e', '.heic', '.jpg', '.png', '.jpeg', '-r',
 					'true', '-t' 'created', '-c', 'true', ])
 
 	all_files = set(find_all_files('test_results', copy_file_extensions=''))
@@ -481,7 +524,7 @@ def test_special_cases_2():
 
 	subprocess.run(['python', 'move_chronologically.py', '-s', 'test_results/test_directory', '-d',
 					'test_results/resulting_images', '-e', '.heic', '.jpg', '.png', '.jpeg', '-m', 'false', '-r',
-					'true', '-t' 'modified', '-c', 'true', ])
+					'true', '-c', 'true', '-t' 'modified', ])
 
 	all_files = set(find_all_files('test_results', copy_file_extensions=''))
 	shutil.rmtree('test_results')
@@ -534,8 +577,7 @@ def test_special_cases_4():
 	shutil.copytree(reference_test_path, name_source_path)
 
 	subprocess.run(['python', 'move_chronologically.py', '-s', 'test_results/test_directory', '-d',
-					'test_results/resulting_images', '-e', '.heic', '.jpg', '.png', '.jpeg', '-m', 'false', '-r',
-					'false', '-t' 'modified', '-c', 'true', ])
+					'test_results/resulting_images', '-e', '.heic', '.jpg', '.png', '.jpeg', '-m', 'false', '-t' 'modified', '-r', 'false', '-c', 'true', ])
 
 	all_files = set(find_all_files('test_results', copy_file_extensions=''))
 	shutil.rmtree('test_results')

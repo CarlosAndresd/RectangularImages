@@ -32,7 +32,7 @@ Related files/directories
 
     - tests_move_chronologically.py: script that contains all the tests.
     - reference_test_directory: this is the directory that contains all the files that are used for the testing.
-    - Test_Photo_Information.xlsx this is the Excel file that can be used to write the tests.
+    - Test_Photo_Information.xlsx: this is the Excel file that can be used to write the tests.
 
 
 Examples
