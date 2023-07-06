@@ -1,4 +1,67 @@
-import os.path, time
+"""
+
+=====================================================================
+move_chronologically, (:mod:`RectangularImages.move_chronologically`)
+=====================================================================
+
+Description
+-----------
+
+    This module contains has one single function: organise all the files in a selected directory by date, either created
+    date or modified date. It is primarily aimed at photos, since it looks for the exif information, but it should work
+    with any file.
+
+    Important! If the file contains exif information and the selected date is the creation date, the program will take
+    the creation date from the exif metadata. Keep in mind that this creation date does not account for different time
+    zones, it always uses UTC.
+
+Functions
+---------
+
+    - create_year_directory
+    - find_all_files
+    - get_file_date
+    - create_file_name_from_date
+    - move_files
+
+
+Related files/directories
+-------------------------
+
+    This module has three related files/directories:
+
+    - tests_move_chronologically.py: script that contains all the tests.
+    - reference_test_directory: this is the directory that contains all the files that are used for the testing.
+    - Test_Photo_Information.xlsx this is the Excel file that can be used to write the tests.
+
+
+Examples
+--------
+
+    Imagine you want to organise the files contained in the directory 'dir_A' and move them to a new directory called
+    'dir_B'. But not all the files, just the '.jpg' and '.heic' files. And you want to organise them by created date.
+    Then you should type
+
+    python move_chronologically.py -s dir_A -d dir_B -e .jpg .heic
+
+    You probably saw a lot of output, depending on the number of files. If you prefer to mute the program you could type
+
+    python move_chronologically.py -s dir_A -d dir_B -e .jpg .heic -m true
+
+    Now, then the files where moved they kept their original name, but maybe you would also like the file name to
+    reflect the creation/modification date, in that case you should type
+
+    python move_chronologically.py -s dir_A -d dir_B -e .jpg .heic -m true -r true
+
+    Finally, if you want to order the files by modified date instead of created date, you can type
+
+    python move_chronologically.py -s dir_A -d dir_B -e .jpg .heic -m true -r true -t modified
+
+
+"""
+
+import os.path
+import time
 from PIL import Image, ExifTags
 from os import walk, rename
 import argparse
@@ -87,8 +150,8 @@ def create_file_name_from_date(file_date):
 	return '_'.join(file_date)
 
 
-def create_new_complete_file_path(assigned_names, assigned_years, file_date, new_file_path, destination_path, file_extension, new_file_name):
-
+def create_new_complete_file_path(assigned_names, assigned_years, file_date, new_file_path, destination_path,
+								  file_extension, new_file_name):
 	file_year, file_month, file_day, file_hour, file_min, file_sec = file_date
 	new_complete_file_path = new_file_path + '/' + new_file_name + file_extension.lower()
 
@@ -97,7 +160,8 @@ def create_new_complete_file_path(assigned_names, assigned_years, file_date, new
 		repeated_name = True
 		while repeated_name:
 			repeated_counter += 1
-			new_complete_file_path = new_file_path + '/' + new_file_name + '_' + str(repeated_counter) + file_extension.lower()
+			new_complete_file_path = new_file_path + '/' + new_file_name + '_' + str(
+				repeated_counter) + file_extension.lower()
 			if not (new_complete_file_path in assigned_names):
 				repeated_name = False
 
@@ -108,7 +172,9 @@ def create_new_complete_file_path(assigned_names, assigned_years, file_date, new
 	return new_complete_file_path
 
 
-def move_files(source_path='other_images', resulting_path='resulting_images', copy_file_extensions=('.jpg', '.jpeg', '.png'), sorting_date='created', new_name=True, mute=False, copy=False):
+def move_files(source_path='other_images', resulting_path='resulting_images',
+			   copy_file_extensions=('.jpg', '.jpeg', '.png'), sorting_date='created', new_name=True, mute=False,
+			   copy=False):
 	if not os.path.exists(resulting_path):
 		os.makedirs(resulting_path)
 
@@ -128,9 +194,13 @@ def move_files(source_path='other_images', resulting_path='resulting_images', co
 		new_file_path = resulting_path + '/' + file_year + '/' + file_year + '_' + file_month
 
 		if new_name:
-			new_complete_file_path = create_new_complete_file_path(assigned_names, assigned_years, file_date, new_file_path, resulting_path, file_extension, create_file_name_from_date(file_date))
+			new_complete_file_path = create_new_complete_file_path(assigned_names, assigned_years, file_date,
+																   new_file_path, resulting_path, file_extension,
+																   create_file_name_from_date(file_date))
 		else:
-			new_complete_file_path = create_new_complete_file_path(assigned_names, assigned_years, file_date, new_file_path, resulting_path, file_extension, original_file_name)
+			new_complete_file_path = create_new_complete_file_path(assigned_names, assigned_years, file_date,
+																   new_file_path, resulting_path, file_extension,
+																   original_file_name)
 
 		if not mute:
 			print(f"{original_complete_file_path} -> {new_complete_file_path}")

@@ -15,7 +15,7 @@ Then the GUI will show the user the first image. The user can do one of five thi
 1. Press the **Right** arrow: this means that that image will be erased.
 2. Press the **Down** arrow: this means that the image will be saved in a separate directory with a default name.
 3. Type `exit`, this will exit the program, more on that later.
-4. Type any name (except for reserved names like `exit`) and then press **Return** of the **Right** arrow. This will move the images to a directory with that name, if the directory does not exists, it is created.
+4. Type any name (except for reserved names like `exit`) and then press **Return** of the **Right** arrow. This will move the images to a directory with that name, if the directory does not exist, it is created.
 5. Press the **Left** arrow: this will undo the last action, unless it was exit (the creation of a new directory is not undone either).
 
 By doing actions 1, 2, or 4, the user goes along all the images that were originally listed. Except for action 3, all actions are in reality moving one file at a time (and if necessary creating new directories). Because this is done in real time, when the user types `exit` all changes are kept and if the same `root` directory is selected later, then the user can continue where it was left off.
@@ -44,7 +44,7 @@ This complementary program can be used as a preparation step, since this file or
 
 ## Execution:
 
-All the programs will be writen in Pythonm, however LaTex will be used for the creation of the final collage.
+All the programs will be writen in Python, however LaTex will be used for the creation of the final collage.
 
 I envision this project as being composed of four main parts or scripts:
 
@@ -62,7 +62,7 @@ This part of the program is completed, name of the main script is `move_chronolo
 
 - `tests_move_chronologically.py` is the module that contains the tests for this part. To execute it simply type `pytest tests_move_chronologically.py -vv` (before, make sure you are in a virtual environment, type `source venv/bin/activate`).
 - `reference_test_directory` this is the directory that contains all the files that are used for the testing.
-- `Test_Photo_Information.xlsx` this is the excel file that can be used to write the tests.
+- `Test_Photo_Information.xlsx` this is the Excel file that can be used to write the tests.
 
 Documentation is still missing.
 
@@ -71,7 +71,7 @@ The main functionality of the program is completed, but the tests are missing. T
 
 Some other details also need to be ironed out, like asking the user for the directory to be analysed (right now, it looks for a directory called `images_GUI`).
 
-However, tests are still missing. By the nature of the GUI I decided to incorporate the tests in the main program itsefl and not use `pytest`. The images that are used for testing are also the ones from the `reference_test_directory` directory.
+However, tests are still missing. By the nature of the GUI I decided to incorporate the tests in the main program itself and not use `pytest`. The images that are used for testing are also the ones from the `reference_test_directory` directory.
 
 Documentation is still missing.
 
@@ -79,9 +79,9 @@ Documentation is still missing.
 I have not done anything regarding this program.
 
 ### *collage program*:
-The core functionality of this program sort of exitst, however, many things still need to be done. Currently, the program reads the image name and number from an excel file, it also has hardcoded the relative image size and assumes that all the images have the same aspect ratio.
+The core functionality of this program sort of exist, however, many things still need to be done. Currently, the program reads the image name and number from an Excel file, it also has hardcoded the relative image size and assumes that all the images have the same aspect ratio.
 
-The main script is called `main.py`, when executed, it reads the excel file and writes the LaTex file that when compiled creates the collage.
+The main script is called `main.py`, when executed, it reads the Excel file and writes the LaTex file that when compiled creates the collage.
 
 
 
